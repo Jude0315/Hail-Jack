@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 
 function Signup() {
@@ -64,12 +65,12 @@ function Signup() {
                   Already have an account?
                 </p>
 
-                <button
-                  type="button"
+                <Link to="/login"
+                  
                   className="btn btn-outline-secondary w-100"
                 >
                   Login
-                </button>
+                </Link>
               </form>
             </div>
           </div>
