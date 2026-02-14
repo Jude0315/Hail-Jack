@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-
+const PlayerModel = require('./models/Player');
 const app = express();
 
 // Middleware
@@ -15,9 +15,10 @@ mongoose
   .catch((err) => console.log("MongoDB connection failed ❌", err));
 
 // Simple test route
-app.get("/", (req, res) => {
+/*app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
-});
+});*/
+
 
 // Start server
 app.listen(3001, () => {
