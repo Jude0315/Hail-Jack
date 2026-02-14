@@ -10,7 +10,7 @@ app.use(express.json());
 
 // Local MongoDB connection
 mongoose
-  .connect("mongodb://localhost:27017/Hail-Jack")
+  .connect("mongodb://127.0.0.1:27017/players")
   .then(() => console.log("MongoDB connected locally ✅"))
   .catch((err) => console.log("MongoDB connection failed ❌", err));
 
