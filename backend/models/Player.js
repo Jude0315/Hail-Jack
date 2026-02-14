@@ -6,5 +6,5 @@ const PlayerSchema = new mongoose.Schema({
     password: String
 })
 
-const PlayerModel = mongoose.model("employees", PlayerSchema)
+const PlayerModel = mongoose.model("players", PlayerSchema)
 module.exports = PlayerModel

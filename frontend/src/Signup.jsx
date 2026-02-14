@@ -1,8 +1,25 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-
+import axios from 'axios'
+import { useNavigate } from "react-router-dom";
 
 function Signup() {
+
+  const [name, setName] = useState()
+  const [email, setEmail] = useState()
+  const [password, setPassword] = useState()
+  const navigate =useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    axios.post('http://localhost:3001/register', {name, email, password})
+    .then(result => {console.log(result)
+   
+    navigate('/login')
+     })
+    .catch(err=> console.log(err))
+}
+
   return (
     <div className="bg-secondary min-vh-100 d-flex align-items-center">
       <div className="container">
@@ -11,7 +28,7 @@ function Signup() {
             <div className="bg-white p-4 rounded shadow">
               <h2 className="text-center mb-4">Register</h2>
 
-              <form>
+              <form onSubmit={handleSubmit}>
                 {/* Name */}
                 <div className="mb-3">
                   <label htmlFor="name" className="form-label">
@@ -24,6 +41,7 @@ function Signup() {
                     name="name"
                     className="form-control"
                     required
+                    onChange={(e)=> setName(e.target.value)}
                   />
                 </div>
 
@@ -39,6 +57,8 @@ function Signup() {
                     name="email"
                     className="form-control"
                     required
+                     onChange={(e)=> setEmail(e.target.value)}
+
                   />
                 </div>
 
@@ -54,6 +74,8 @@ function Signup() {
                     name="password"
                     className="form-control"
                     required
+                  onChange={(e)=> setPassword(e.target.value)}
+
                   />
                 </div>
 
