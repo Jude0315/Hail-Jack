@@ -18,7 +18,7 @@ function Login() {
         console.log(result);
         if(result.data ==="Success"){
 
-        navigate("/home");
+        navigate("/dashboard");
         }
         
       })
