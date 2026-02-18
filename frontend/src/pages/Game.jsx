@@ -1,91 +1,165 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/scene.css"; // reuse your card/button styles
+import "../styles/scene.css";
 
 export default function Game() {
   const navigate = useNavigate();
 
-  // tug meter: -4..+4
   const [meter, setMeter] = useState(0);
   const [streak, setStreak] = useState(0);
   const [status, setStatus] = useState("playing"); // playing | win | lose
 
-  // TEMP questions (replace with API later)
-  const questions = useMemo(
-    () => [
-      {
-        q: "2 + 2 = ?",
-        options: ["3", "4", "5", "22"],
-        answer: "4",
-      },
-      {
-        q: "5 × 3 = ?",
-        options: ["8", "15", "10", "53"],
-        answer: "15",
-      },
-      {
-        q: "12 ÷ 4 = ?",
-        options: ["2", "3", "4", "6"],
-        answer: "3",
-      },
-      {
-        q: "9 − 1 = ?",
-        options: ["7", "8", "9", "10"],
-        answer: "8",
-      },
-    ],
-    []
-  );
-
+  const [questions, setQuestions] = useState([]);
   const [idx, setIdx] = useState(0);
-  const current = questions[idx];
 
-  // decide win/lose
+  const [loading, setLoading] = useState(true);
+  const [locked, setLocked] = useState(false); // ✅ prevents double clicks
+
+  // ✅ Reusable question loader
+  const loadQuestions = async () => {
+    try {
+      setLoading(true);
+
+      const url = `http://localhost:3001/game/questions?amount=5&t=${Date.now()}`;
+      const res = await fetch(url);
+
+      if (!res.ok) throw new Error(`Backend returned ${res.status}`);
+
+      const data = await res.json();
+
+      if (!Array.isArray(data.questions)) {
+        throw new Error("Invalid questions format");
+      }
+
+      setQuestions(data.questions);
+      setIdx(0);
+    } catch (err) {
+      console.error("Failed to load questions:", err);
+      setQuestions([]);
+      setIdx(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load on first mount
+  useEffect(() => {
+    loadQuestions();
+  }, []);
+
+  // Win/Lose logic
   useEffect(() => {
     if (meter >= 4) setStatus("win");
     if (meter <= -4) setStatus("lose");
   }, [meter]);
 
-  const nextQuestion = () => {
-    setIdx((prev) => (prev + 1) % questions.length);
-  };
-
+  // ✅ CPU pull (only triggered on wrong answer)
   const computerPull = () => {
-    // simple AI: 55% chance to pull back (tune later)
-    const cpuCorrect = Math.random() < 0.55;
-    if (cpuCorrect) setMeter((m) => m - 1);
+    const cpuPulls = Math.random() < 0.35;
+    if (cpuPulls) setMeter((m) => m - 1);
   };
 
+  // ✅ No-repeat nextQuestion:
+  // If this was the last question -> fetch a new batch
+  const nextQuestion = async () => {
+    // If we are at the end of the current batch, fetch a new batch
+    if (idx >= questions.length - 1) {
+      await loadQuestions();
+      return;
+    }
+    setIdx((prev) => prev + 1);
+  };
+
+  // ✅ Answer handling
   const submitAnswer = (choice) => {
     if (status !== "playing") return;
+    if (locked) return; // ✅ ignore spam clicks
 
-    const correct = choice === current.answer;
+    const current = questions[idx];
+    if (!current) return;
+
+    setLocked(true);
+
+    const normalize = (s) => String(s).trim().toLowerCase();
+    const correct = normalize(choice) === normalize(current.answer);
 
     if (correct) {
       setMeter((m) => m + 1);
       setStreak((s) => s + 1);
+
+      setTimeout(async () => {
+        await nextQuestion();
+        setLocked(false);
+      }, 350);
     } else {
       setMeter((m) => m - 1);
       setStreak(0);
-    }
 
-    // CPU responds after you answer (small delay feels better)
-    setTimeout(() => {
-      computerPull();
-      nextQuestion();
-    }, 350);
+      setTimeout(async () => {
+        computerPull();
+        await nextQuestion();
+        setLocked(false);
+      }, 350);
+    }
   };
 
-  const resetGame = () => {
+  // ✅ Play Again = reset + fetch fresh questions
+  const resetGame = async () => {
     setMeter(0);
     setStreak(0);
     setStatus("playing");
-    setIdx(0);
+    setLocked(false);
+    await loadQuestions();
   };
+
+  // Loading Screen
+  if (loading) {
+    return (
+      <div className="scene">
+        <video className="bgVideo" autoPlay loop muted playsInline>
+          <source src="/videos/dashboard.mp4" type="video/mp4" />
+        </video>
+
+        <div className="ui">
+          <div className="card">
+            <h2 className="title" style={{ fontSize: 32 }}>
+              Loading Questions...
+            </h2>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Failed fetch
+  if (!questions.length) {
+    return (
+      <div className="scene">
+        <video className="bgVideo" autoPlay loop muted playsInline>
+          <source src="/videos/dashboard.mp4" type="video/mp4" />
+        </video>
+
+        <div className="ui">
+          <div className="card">
+            <h2 className="title">Failed to Load Questions</h2>
+            <div className="rowBtns" style={{ marginTop: 14 }}>
+              <button className="smallBtn" onClick={loadQuestions}>
+                Retry
+              </button>
+              <button className="smallBtn" onClick={() => navigate("/dashboard")}>
+                Back
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const current = questions[idx];
 
   return (
     <div className="scene">
-      {/* Reuse your background video (optional) */}
       <video className="bgVideo" autoPlay loop muted playsInline>
         <source src="/videos/dashboard.mp4" type="video/mp4" />
       </video>
@@ -104,7 +178,6 @@ export default function Game() {
               <span>You</span>
             </div>
 
-            {/* simple bar */}
             <div
               style={{
                 marginTop: 10,
@@ -129,19 +202,15 @@ export default function Game() {
             </div>
           </div>
 
-          {/* Win/Lose */}
           {status !== "playing" ? (
             <div style={{ textAlign: "center" }}>
               <h3 style={{ color: "#eaf1ff" }}>
-                {status === "win" ? "You Win 🏆 (Hammer time)" : "You Lose 🌊"}
+                {status === "win" ? "You Win 🏆" : "You Lose 🌊"}
               </h3>
-              <p style={{ color: "rgba(234,241,255,0.75)" }}>
-                Meter reached {meter}.
-              </p>
 
               <div className="rowBtns" style={{ marginTop: 14 }}>
                 <button className="smallBtn" onClick={resetGame}>
-                  Play Again
+                  Play Again (New Questions)
                 </button>
                 <button className="smallBtn" onClick={() => navigate("/dashboard")}>
                   Back to Dashboard
@@ -152,7 +221,7 @@ export default function Game() {
             <>
               {/* Question */}
               <div style={{ color: "#eaf1ff", fontSize: 20, marginBottom: 14 }}>
-                {current.q}
+                {current.question}
               </div>
 
               {/* Options */}
@@ -162,6 +231,8 @@ export default function Game() {
                     key={opt}
                     className="smallBtn"
                     onClick={() => submitAnswer(opt)}
+                    disabled={locked} // ✅ prevent double click
+                    style={locked ? { opacity: 0.6, cursor: "not-allowed" } : undefined}
                   >
                     {opt}
                   </button>
