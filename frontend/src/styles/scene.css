@@ -1,59 +1,37 @@
+/* ============================= */
+/* Scene Container               */
+/* ============================= */
+
 .scene {
   position: relative;
   width: 100%;
   min-height: 100vh;
   overflow: hidden;
-  background: radial-gradient(circle at 30% 20%, #1b2a6b 0%, #060818 60%, #02030a 100%);
+  background: #02030a; /* fallback if video fails */
+  font-family: "Segoe UI", sans-serif;
 }
 
-.layer {
+/* ============================= */
+/* Background Video              */
+/* ============================= */
+
+.bgVideo {
   position: absolute;
-  inset: -8%;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
-  will-change: transform, opacity;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
 }
 
-.layer.sky {
-  background-image: url("../assets/scene/sky.png");
-}
+/* Dark cinematic overlay */
 
-.layer.stars {
-  background-image: url("../assets/scene/stars.png");
-  opacity: 0.8;
-  animation: twinkle 4s ease-in-out infinite alternate;
-}
 
-.layer.moon {
-  background-image: url("../assets/scene/moon.png");
-  background-size: 320px auto;
-  background-position: 82% 18%;
-  filter: drop-shadow(0 0 25px rgba(220, 235, 255, 0.25));
-  animation: moonPulse 6s ease-in-out infinite;
-}
+/* ============================= */
+/* UI Layer                      */
+/* ============================= */
 
-.layer.icebergs {
-  background-image: url("../assets/scene/icebergs.png");
-  background-position: center bottom;
-  opacity: 0.95;
-}
-
-.layer.ship {
-  background-image: url("../assets/scene/ship.png");
-  background-size: 520px auto;
-  background-position: 62% 70%;
-  animation: shipBob 3.2s ease-in-out infinite;
-}
-
-.layer.water {
-  background-image: url("../assets/scene/water.png");
-  background-position: center bottom;
-  animation: waterDrift 10s linear infinite;
-  opacity: 0.95;
-}
-
-/* UI on top */
 .ui {
   position: relative;
   z-index: 10;
@@ -63,71 +41,155 @@
   padding: 24px;
 }
 
+/* ============================= */
+/* Glass Card                    */
+/* ============================= */
+
 .card {
-  width: min(560px, 92vw);
-  background: rgba(10, 12, 24, 0.55);
-  border: 1px solid rgba(255,255,255,0.12);
-  backdrop-filter: blur(12px);
-  border-radius: 18px;
-  padding: 28px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  width: min(580px, 92vw);
+  background: rgba(10, 15, 35, 0.55);
+  border: 1px solid rgba(255,255,255,0.15);
+  backdrop-filter: blur(14px);
+  border-radius: 20px;
+  padding: 34px;
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    0 0 40px rgba(0, 140, 255, 0.15);
+  text-align: center;
+  animation: fadeIn 1.2s ease forwards;
 }
+
+/* ============================= */
+/* Title & Subtitle              */
+/* ============================= */
 
 .title {
   color: #eaf1ff;
-  font-size: 44px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  margin: 0 0 8px;
-  text-align: center;
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  text-shadow: 0 0 20px rgba(100,180,255,0.6);
 }
 
 .subtitle {
   color: rgba(234, 241, 255, 0.75);
-  text-align: center;
-  margin-bottom: 18px;
+  margin-bottom: 28px;
+  font-size: 16px;
 }
+
+/* ============================= */
+/* Main Start Button             */
+/* ============================= */
 
 .bigBtn {
   width: 100%;
-  padding: 16px 18px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: linear-gradient(180deg, rgba(86,214,255,0.9), rgba(30,110,255,0.9));
-  color: #071026;
-  font-weight: 800;
-  font-size: 18px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(
+    180deg,
+    #5edbff,
+    #1c7bff
+  );
+  color: #041024;
+  font-weight: 900;
+  font-size: 20px;
   cursor: pointer;
-  transition: transform 120ms ease, filter 120ms ease;
+  transition: all 0.2s ease;
+  box-shadow:
+    0 6px 0 #0d4cb3,
+    0 10px 25px rgba(0, 150, 255, 0.4);
 }
 
-.bigBtn:hover { transform: scale(1.02); filter: brightness(1.05); }
-.bigBtn:active { transform: scale(0.99); }
+.bigBtn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow:
+    0 8px 0 #0d4cb3,
+    0 15px 35px rgba(0, 180, 255, 0.6);
+}
+
+.bigBtn:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 2px 0 #0d4cb3,
+    0 8px 20px rgba(0, 150, 255, 0.4);
+}
+
+/* ============================= */
+/* Secondary Buttons             */
+/* ============================= */
 
 .rowBtns {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 14px;
+  margin-top: 18px;
 }
 
 .smallBtn {
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.18);
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.2);
   background: rgba(255,255,255,0.08);
   color: #eaf1ff;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 120ms ease, background 120ms ease;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
 }
 
-.smallBtn:hover { transform: translateY(-1px); background: rgba(255,255,255,0.12); }
-
-@keyframes twinkle { from { opacity: 0.55; } to { opacity: 0.9; } }
-@keyframes moonPulse {
-  0%,100% { filter: drop-shadow(0 0 18px rgba(220,235,255,0.18)); }
-  50%     { filter: drop-shadow(0 0 34px rgba(220,235,255,0.35)); }
+.smallBtn:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.15);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
 }
-@keyframes waterDrift { 0% { transform: translateX(0); } 100% { transform: translateX(-4%); } }
-@keyframes shipBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+
+.smallBtn:active {
+  transform: translateY(1px);
+}
+
+/* ============================= */
+/* Animations                    */
+/* ============================= */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Optional subtle floating effect */
+.card {
+  animation:
+    fadeIn 1.2s ease forwards,
+    floatCard 6s ease-in-out infinite 1.2s;
+}
+
+@keyframes floatCard {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-6px); }
+}
+
+/* ============================= */
+/* Responsive Tweaks             */
+/* ============================= */
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 36px;
+  }
+
+  .bigBtn {
+    font-size: 18px;
+  }
+
+  .rowBtns {
+    grid-template-columns: 1fr;
+  }
+}
