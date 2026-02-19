@@ -8,7 +8,7 @@ const app = express();
 // Middleware
 app.use(express.json());
 
-// ✅ CORS (frontend is Vite default 5173)
+// CORS (frontend Vite default 5173)
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -26,7 +26,9 @@ mongoose
 app.post("/register", (req, res) => {
   PlayerModel.create(req.body)
     .then((player) => res.json(player))
-    .catch((err) => res.status(500).json({ message: "Register failed", error: err.message }));
+    .catch((err) =>
+      res.status(500).json({ message: "Register failed", error: err.message })
+    );
 });
 
 // Login
@@ -43,8 +45,55 @@ app.post("/login", (req, res) => {
 
       return res.json({ message: "Success" });
     })
-    .catch((err) => res.status(500).json({ message: "Login failed", error: err.message }));
+    .catch((err) =>
+      res.status(500).json({ message: "Login failed", error: err.message })
+    );
 });
+
+/**
+ * ✅ fetch with timeout + retry (NO extra packages)
+ */
+async function fetchWithTimeout(url, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchOpenTdbWithRetry(url, retries = 3) {
+  let lastErr;
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await fetchWithTimeout(url, 8000);
+
+      if (!response.ok) {
+        throw new Error(`OpenTDB HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!data || !Array.isArray(data.results)) {
+        throw new Error("OpenTDB returned invalid format");
+      }
+
+      if (data.results.length === 0) {
+        throw new Error("OpenTDB returned empty results");
+      }
+
+      return data;
+    } catch (err) {
+      lastErr = err;
+      console.warn(`OpenTDB attempt ${attempt} failed: ${err.message}`);
+    }
+  }
+
+  throw lastErr;
+}
 
 // ✅ Questions route (external API via backend)
 app.get("/game/questions", async (req, res) => {
@@ -53,17 +102,7 @@ app.get("/game/questions", async (req, res) => {
 
     const url = `https://opentdb.com/api.php?amount=${amount}&type=multiple&difficulty=easy`;
 
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`OpenTDB HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (!data || !Array.isArray(data.results)) {
-      throw new Error("OpenTDB returned invalid format");
-    }
+    const data = await fetchOpenTdbWithRetry(url, 3);
 
     const decode = (s = "") =>
       s
@@ -89,9 +128,9 @@ app.get("/game/questions", async (req, res) => {
 
     res.json({ questions });
   } catch (err) {
-    console.error("GAME QUESTIONS ERROR:", err);
-    res.status(500).json({
-      message: "Failed to fetch questions",
+    console.error("GAME QUESTIONS FINAL FAIL:", err.message);
+    res.status(502).json({
+      message: "Question service unavailable (OpenTDB)",
       error: err.message,
     });
   }

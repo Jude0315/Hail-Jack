@@ -1,0 +1,161 @@
+/* Game-specific styling (keeps scene.css untouched) */
+
+.gameCard {
+  width: min(820px, 94vw);
+}
+
+.gameHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.gameTitle {
+  font-size: 30px !important;
+  margin: 0;
+}
+
+.miniInfo {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.pill {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(234, 241, 255, 0.9);
+}
+
+/* Tug area placeholder (you can swap avatars with PNGs later) */
+.tugStage {
+  margin: 14px 0 18px;
+  display: grid;
+  grid-template-columns: 120px 1fr 120px;
+  align-items: center;
+  gap: 12px;
+}
+
+.tugSide {
+  display: flex;
+  justify-content: center;
+}
+
+.avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  letter-spacing: 1px;
+  user-select: none;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #eaf1ff;
+}
+
+.cpuAvatar {
+  filter: saturate(0.9);
+}
+
+.playerAvatar {
+  filter: saturate(1.2);
+}
+
+.tugCenter {
+  position: relative;
+  height: 90px;
+  display: grid;
+  align-items: center;
+}
+
+.plank {
+  height: 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 28px;
+  border-radius: 10px;
+  background: rgba(94, 219, 255, 0.9);
+  box-shadow: 0 0 22px rgba(94, 219, 255, 0.35);
+  transition: left 250ms ease;
+}
+
+/* Meter block */
+.meterBlock {
+  margin: 6px 0 18px;
+  color: rgba(234, 241, 255, 0.8);
+}
+
+.meterRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.meterBar {
+  margin-top: 10px;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.meterFill {
+  height: 100%;
+  background: rgba(94, 219, 255, 0.9);
+  transition: width 250ms ease;
+}
+
+.streakText {
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Question + options */
+.questionText {
+  color: #eaf1ff;
+  font-size: 20px;
+  margin-bottom: 14px;
+}
+
+.optionGrid {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Result */
+.resultBox {
+  text-align: center;
+}
+
+.resultTitle {
+  color: #eaf1ff;
+}
+
+/* Small responsive tweak */
+@media (max-width: 768px) {
+  .tugStage {
+    grid-template-columns: 90px 1fr 90px;
+  }
+  .avatar {
+    width: 74px;
+    height: 74px;
+  }
+  .optionGrid {
+    grid-template-columns: 1fr;
+  }
+}
