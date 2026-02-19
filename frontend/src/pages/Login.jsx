@@ -6,23 +6,43 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [error, setError] = useState(""); // show login errors nicely
+  const [loading, setLoading] = useState(false); // prevent double submit
+
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    axios
-      .post("http://localhost:3001/login", { email, password })
-      .then((result) => {
+    try {
+      const result = await axios.post("http://localhost:3001/login", {
+        email,
+        password,
+      });
 
-        console.log(result);
-        if(result.data ==="Success"){
+      console.log("Login response:", result.data);
 
+      // ✅ Your backend returns: { message: "Success" }
+      if (result.data?.message === "Success") {
         navigate("/dashboard");
-        }
-        
-      })
-      .catch((err) => console.log(err));
+        return;
+      }
+
+      // fallback if backend returns something else
+      setError(result.data?.message || "Login failed. Try again.");
+    } catch (err) {
+      // Show proper error message from backend (404/401/etc.)
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Login failed. Server error.";
+      setError(msg);
+      console.error("Login error:", err?.response || err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -32,6 +52,13 @@ function Login() {
           <div className="col-12 col-sm-10 col-md-6 col-lg-4">
             <div className="bg-white p-4 rounded shadow">
               <h2 className="text-center mb-4">Login</h2>
+
+              {/* ✅ Error message UI */}
+              {error && (
+                <div className="alert alert-danger py-2" role="alert">
+                  {error}
+                </div>
+              )}
 
               <form onSubmit={handleSubmit}>
                 {/* Email */}
@@ -66,18 +93,19 @@ function Login() {
                   />
                 </div>
 
-                <button type="submit" className="btn btn-primary w-100">
-                  Login
+                <button
+                  type="submit"
+                  className="btn btn-primary w-100"
+                  disabled={loading}
+                >
+                  {loading ? "Logging in..." : "Login"}
                 </button>
 
                 <p className="text-center mt-3 mb-2">
-                  Don't have an account?
+                  Don&apos;t have an account?
                 </p>
 
-                <Link
-                  to="/register"
-                  className="btn btn-outline-secondary w-100"
-                >
+                <Link to="/register" className="btn btn-outline-secondary w-100">
                   Register
                 </Link>
               </form>
