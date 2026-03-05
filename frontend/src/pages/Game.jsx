@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/scene.css";
 import "../styles/game.css";
+import Player1Sprite from "../components/Player1Sprite";
 
 export default function Game() {
   const navigate = useNavigate();
@@ -17,8 +18,15 @@ export default function Game() {
   const [locked, setLocked] = useState(false);
   const [loadError, setLoadError] = useState("");
 
-  // ✅ avoid overlapping loads (mount + end-of-batch + retry)
+  // sprite animation state
+  const [p1Anim, setP1Anim] = useState("HANG_IDLE");
+
+  // avoid overlapping loads
   const isLoadingRef = useRef(false);
+
+  // track transitions for one-shot animations
+  const prevMeterRef = useRef(0);
+  const animLockRef = useRef(false); // prevents idle effect from overriding one-shots
 
   const loadQuestions = async () => {
     if (isLoadingRef.current) return;
@@ -60,10 +68,11 @@ export default function Game() {
     loadQuestions();
   }, []);
 
-  // win/lose
+  // ✅ FIX #1: meter -> status (you removed this in the new code)
   useEffect(() => {
     if (meter >= 4) setStatus("win");
-    if (meter <= -4) setStatus("lose");
+    else if (meter <= -4) setStatus("lose");
+    else setStatus("playing");
   }, [meter]);
 
   // CPU pull only on wrong answer
@@ -120,8 +129,75 @@ export default function Game() {
     setStreak(0);
     setStatus("playing");
     setLocked(false);
+
+    // reset animation + transition tracking
+    setP1Anim("HANG_IDLE");
+    prevMeterRef.current = 0;
+    animLockRef.current = false;
+
     await loadQuestions();
   };
+
+  // ✅ FIX #2: animation sync (one-shots + idles)
+  useEffect(() => {
+    const prev = prevMeterRef.current;
+    const curr = meter;
+    prevMeterRef.current = curr;
+
+    // WIN / LOSE one-shots (freeze)
+    if (status === "win") {
+      animLockRef.current = true;
+      setP1Anim("BACKFLIP_WIN");
+      return;
+    }
+    if (status === "lose") {
+      animLockRef.current = true;
+      setP1Anim("LOSE_SINK");
+      return;
+    }
+
+    // If a one-shot is currently playing, do not override it
+    if (animLockRef.current) return;
+
+    // CROSSING: hanging -> plank (0 or below to 1 or more)
+    if (prev <= 0 && curr >= 1) {
+      animLockRef.current = true;
+      setP1Anim("CLIMB_UP");
+
+      // after climb finishes, go to plank idle/hype
+      setTimeout(() => {
+        animLockRef.current = false;
+        if (streak >= 2) setP1Anim("HYPE_IDLE");
+        else setP1Anim("PLANK_IDLE");
+      }, 850); // adjust if your CLIMB_UP duration differs
+
+      return;
+    }
+
+    // CROSSING: plank -> hanging (1 or more to 0 or below)
+    if (prev >= 1 && curr <= 0) {
+      animLockRef.current = true;
+      setP1Anim("SLIP_DOWN");
+
+      setTimeout(() => {
+        animLockRef.current = false;
+        // hang idle vs panic idle
+        if (curr < 0) setP1Anim("PANIC_HANG_IDLE");
+        else setP1Anim("HANG_IDLE");
+      }, 850); // adjust if your SLIP_DOWN duration differs
+
+      return;
+    }
+
+    // Otherwise, choose idle based on current state
+    if (curr >= 1) {
+      if (streak >= 2) setP1Anim("HYPE_IDLE");
+      else setP1Anim("PLANK_IDLE");
+    } else {
+      if (curr < 0) setP1Anim("PANIC_HANG_IDLE");
+      else setP1Anim("HANG_IDLE");
+    }
+  }, [meter, streak, status]);
 
   // LOADING
   if (loading) {
@@ -189,7 +265,7 @@ export default function Game() {
             </div>
           </div>
 
-          {/* Tug Visual Placeholder */}
+          {/* Tug Visual */}
           <div className={`tugStage stage-${meter}`}>
             <div className="tugSide cpu">
               <div className="avatar cpuAvatar">CPU</div>
@@ -197,11 +273,16 @@ export default function Game() {
 
             <div className="tugCenter">
               <div className="plank" />
-              <div className="marker" style={{ left: `${((meter + 4) / 8) * 100}%` }} />
+              <div
+                className="marker"
+                style={{ left: `${((meter + 4) / 8) * 100}%` }}
+              />
             </div>
 
             <div className="tugSide player">
-              <div className="avatar playerAvatar">YOU</div>
+              <div className="avatar playerAvatar">
+                <Player1Sprite anim={p1Anim}speed={0.6} />
+              </div>
             </div>
           </div>
 
