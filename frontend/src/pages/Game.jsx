@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import "../styles/scene.css";
 import "../styles/game.css";
 import Player1Sprite from "../components/Player1Sprite";
+import plankImg from "../assets/scene/plank.png";
 
 export default function Game() {
   const navigate = useNavigate();
 
   const [meter, setMeter] = useState(0);
   const [streak, setStreak] = useState(0);
-  const [status, setStatus] = useState("playing"); // playing | win | lose
+  const [status, setStatus] = useState("playing");
 
   const [questions, setQuestions] = useState([]);
   const [idx, setIdx] = useState(0);
@@ -18,15 +19,11 @@ export default function Game() {
   const [locked, setLocked] = useState(false);
   const [loadError, setLoadError] = useState("");
 
-  // sprite animation state
   const [p1Anim, setP1Anim] = useState("HANG_IDLE");
+  const [p1Pose, setP1Pose] = useState("HANG"); // HANG | CLIMB | PLANK | SINK
 
-  // avoid overlapping loads
   const isLoadingRef = useRef(false);
-
-  // track transitions for one-shot animations
   const prevMeterRef = useRef(0);
-  const animLockRef = useRef(false); // prevents idle effect from overriding one-shots
 
   const loadQuestions = async () => {
     if (isLoadingRef.current) return;
@@ -63,25 +60,66 @@ export default function Game() {
     }
   };
 
-  // load on mount
   useEffect(() => {
     loadQuestions();
   }, []);
 
-  // ✅ FIX #1: meter -> status (you removed this in the new code)
   useEffect(() => {
     if (meter >= 4) setStatus("win");
     else if (meter <= -4) setStatus("lose");
     else setStatus("playing");
   }, [meter]);
 
-  // CPU pull only on wrong answer
+  useEffect(() => {
+    const prevMeter = prevMeterRef.current;
+    const currMeter = meter;
+    prevMeterRef.current = currMeter;
+
+    if (status === "win") {
+      setP1Pose("PLANK");
+      setP1Anim("BACKFLIP_WIN");
+      return;
+    }
+
+    if (status === "lose") {
+      setP1Pose("SINK");
+      setP1Anim("LOSE_SINK");
+      return;
+    }
+
+    // Hanging -> climb up onto plank
+    if (prevMeter <= 0 && currMeter >= 1) {
+      setP1Pose("CLIMB");
+      setP1Anim("CLIMB_UP");
+      return;
+    }
+
+    // Plank -> hanging
+    if (prevMeter >= 1 && currMeter <= 0) {
+      setP1Pose("HANG");
+      setP1Anim(currMeter < 0 ? "PANIC_HANG_IDLE" : "HANG_IDLE");
+      return;
+    }
+
+    // Already on plank
+    if (currMeter >= 1) {
+      setP1Pose("PLANK");
+      if (streak >= 2) setP1Anim("HYPE_IDLE");
+      else setP1Anim("PLANK_IDLE");
+      return;
+    }
+
+    // Hanging
+    setP1Pose("HANG");
+    if (currMeter < 0) setP1Anim("PANIC_HANG_IDLE");
+    else setP1Anim("HANG_IDLE");
+  }, [meter, streak, status]);
+
   const computerPull = () => {
     const cpuPulls = Math.random() < 0.35;
     if (cpuPulls) setMeter((m) => m - 1);
   };
 
-  // no repeats: fetch new batch after last question
   const nextQuestion = async () => {
     if (status !== "playing") return;
 
@@ -105,13 +143,18 @@ export default function Game() {
     const correct = normalize(choice) === normalize(current.answer);
 
     if (correct) {
+      const prev = meter;
       setMeter((m) => m + 1);
       setStreak((s) => s + 1);
+
+      if (prev >= 1 && status === "playing") {
+        setP1Anim("MINI_PULL");
+      }
 
       setTimeout(async () => {
         await nextQuestion();
         setLocked(false);
-      }, 350);
+      }, 650);
     } else {
       setMeter((m) => m - 1);
       setStreak(0);
@@ -120,7 +163,7 @@ export default function Game() {
         computerPull();
         await nextQuestion();
         setLocked(false);
-      }, 350);
+      }, 650);
     }
   };
 
@@ -130,83 +173,52 @@ export default function Game() {
     setStatus("playing");
     setLocked(false);
 
-    // reset animation + transition tracking
     setP1Anim("HANG_IDLE");
+    setP1Pose("HANG");
     prevMeterRef.current = 0;
-    animLockRef.current = false;
 
     await loadQuestions();
   };
 
-  // ✅ FIX #2: animation sync (one-shots + idles)
-  useEffect(() => {
-    const prev = prevMeterRef.current;
-    const curr = meter;
-    prevMeterRef.current = curr;
+  const handleP1AnimDone = (finishedAnim) => {
+    if (status === "win") return;
 
-    // WIN / LOSE one-shots (freeze)
-    if (status === "win") {
-      animLockRef.current = true;
-      setP1Anim("BACKFLIP_WIN");
-      return;
-    }
     if (status === "lose") {
-      animLockRef.current = true;
-      setP1Anim("LOSE_SINK");
+      setP1Anim("UNDERWATER_DRIFT");
       return;
     }
 
-    // If a one-shot is currently playing, do not override it
-    if (animLockRef.current) return;
-
-    // CROSSING: hanging -> plank (0 or below to 1 or more)
-    if (prev <= 0 && curr >= 1) {
-      animLockRef.current = true;
-      setP1Anim("CLIMB_UP");
-
-      // after climb finishes, go to plank idle/hype
-      setTimeout(() => {
-        animLockRef.current = false;
-        if (streak >= 2) setP1Anim("HYPE_IDLE");
-        else setP1Anim("PLANK_IDLE");
-      }, 850); // adjust if your CLIMB_UP duration differs
-
-      return;
-    }
-
-    // CROSSING: plank -> hanging (1 or more to 0 or below)
-    if (prev >= 1 && curr <= 0) {
-      animLockRef.current = true;
-      setP1Anim("SLIP_DOWN");
-
-      setTimeout(() => {
-        animLockRef.current = false;
-        // hang idle vs panic idle
-        if (curr < 0) setP1Anim("PANIC_HANG_IDLE");
-        else setP1Anim("HANG_IDLE");
-      }, 850); // adjust if your SLIP_DOWN duration differs
-
-      return;
-    }
-
-    // Otherwise, choose idle based on current state
-    if (curr >= 1) {
+    if (finishedAnim === "CLIMB_UP") {
+      setP1Pose("PLANK");
       if (streak >= 2) setP1Anim("HYPE_IDLE");
       else setP1Anim("PLANK_IDLE");
-    } else {
-      if (curr < 0) setP1Anim("PANIC_HANG_IDLE");
-      else setP1Anim("HANG_IDLE");
+      return;
     }
-  }, [meter, streak, status]);
 
-  // LOADING
+    if (finishedAnim === "MINI_PULL") {
+      if (streak >= 2) setP1Anim("HYPE_IDLE");
+      else setP1Anim("PLANK_IDLE");
+      return;
+    }
+
+    if (finishedAnim === "LOSE_SINK") {
+      setP1Anim("UNDERWATER_DRIFT");
+    }
+  };
+
+  const getP1Speed = () => {
+    if (p1Anim === "CLIMB_UP") return 0.28;       // slower climb
+    if (p1Anim === "BACKFLIP_WIN") return 0.5;
+    if (p1Anim === "MINI_PULL") return 0.5;
+    return 0.65; // loops
+  };
+
   if (loading) {
     return (
       <div className="scene">
         <video className="bgVideo" autoPlay loop muted playsInline>
           <source src="/videos/dashboard.mp4" type="video/mp4" />
         </video>
-
         <div className="ui">
           <div className="card">
             <h2 className="title" style={{ fontSize: 32 }}>
@@ -218,21 +230,18 @@ export default function Game() {
     );
   }
 
-  // FAILED
   if (!questions.length) {
     return (
       <div className="scene">
         <video className="bgVideo" autoPlay loop muted playsInline>
           <source src="/videos/dashboard.mp4" type="video/mp4" />
         </video>
-
         <div className="ui">
           <div className="card">
             <h2 className="title">Failed to Load Questions</h2>
             <p className="subtitle" style={{ opacity: 0.85 }}>
               {loadError || "Unknown error"}
             </p>
-
             <div className="rowBtns" style={{ marginTop: 14 }}>
               <button className="smallBtn" onClick={loadQuestions}>
                 Retry
@@ -265,28 +274,38 @@ export default function Game() {
             </div>
           </div>
 
-          {/* Tug Visual */}
-          <div className={`tugStage stage-${meter}`}>
-            <div className="tugSide cpu">
-              <div className="avatar cpuAvatar">CPU</div>
-            </div>
+          <div className="tugStage">
+            <div className="tugArena">
+              <img
+                src={plankImg}
+                alt="plank"
+                className="plankImg"
+                style={{
+                  transform: `translateX(calc(-50% + ${meter * 8}px)) rotate(${meter * 1.5}deg)`
+                }}
+              />
 
-            <div className="tugCenter">
-              <div className="plank" />
               <div
                 className="marker"
-                style={{ left: `${((meter + 4) / 8) * 100}%` }}
+                style={{ left: `calc(50% + ${meter * 18}px)` }}
               />
-            </div>
 
-            <div className="tugSide player">
-              <div className="avatar playerAvatar">
-                <Player1Sprite anim={p1Anim}speed={0.6} />
-              </div>
+              <div
+  className={`playerAnchor pose-${p1Pose.toLowerCase()} ${
+    status === "lose" ? "playerFadeOut" : ""
+  }`}
+>
+  <div className="playerAvatar">
+    <Player1Sprite
+      anim={p1Anim}
+      speed={getP1Speed()}
+      onDone={handleP1AnimDone}
+    />
+  </div>
+</div>
             </div>
           </div>
 
-          {/* Meter */}
           <div className="meterBlock">
             <div className="meterRow">
               <span>Computer</span>
@@ -306,7 +325,6 @@ export default function Game() {
             </div>
           </div>
 
-          {/* Win/Lose */}
           {status !== "playing" ? (
             <div className="resultBox">
               <h3 className="resultTitle">
@@ -324,10 +342,8 @@ export default function Game() {
             </div>
           ) : (
             <>
-              {/* Question */}
               <div className="questionText">{current.question}</div>
 
-              {/* Options */}
               <div className="rowBtns optionGrid">
                 {current.options.map((opt) => (
                   <button

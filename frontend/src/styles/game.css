@@ -1,145 +1,106 @@
 /* =========================
-   Game layout
-========================= */
-
-.gameCard {
-  width: min(860px, 94vw);
-}
-
-.gameHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.gameTitle {
-  font-size: 30px !important;
-  margin: 0;
-}
-
-.miniInfo {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.pill {
-  font-size: 12px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(234, 241, 255, 0.9);
-}
-
-/* =========================
-   Tug stage
+   TUG AREA ONLY
 ========================= */
 
 .tugStage {
-  margin: 14px 0 18px;
-  display: grid;
-  grid-template-columns: 160px 1fr 160px;
-  align-items: end;
-  gap: 12px;
-  min-height: 180px;
-}
-
-.tugSide {
-  display: flex;
-  justify-content: center;
-  align-items: end;
-}
-
-.tugCenter {
   position: relative;
-  height: 120px;
-  display: grid;
-  align-items: center;
+  width: 100%;
+  min-height: 360px;
+  margin: 12px 0 18px;
 }
 
-.plank {
-  height: 16px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+.tugArena {
+  position: relative;
+  width: 100%;
+  height: 320px;
+}
+
+/* Longer plank, lower on screen */
+.plankImg {
+  width: 380px;
+  position: absolute;
+  left: 50%;
+  bottom: 70px;
+  transform: translateX(-50%);
+  z-index: 3;
+  transition: transform 1s ease;
+}
+
+/* Player anchor attached near right edge of plank */
+
+.playerAnchor {
+  position: absolute;
+  left: calc(50% + 120px);
+  bottom: 40px;
+  width: 256px;
+  height: 256px;
+  z-index: 4;
+  transition:
+    transform 13s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 2.6s ease;
+  opacity: 1;
+}
+
+.playerFadeOut {
+  opacity: 0;
+}
+
+
+/* sprite box */
+.playerAvatar {
+  width: 256px;
+  height: 256px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  transform-origin: center bottom;
+}
+
+/* hanging below plank */
+.pose-hang {
+  transform: translate(-37%, 60px);
+}
+
+/* climbing transition: midway */
+.pose-climb {
+  transform: translate(-38%, -150px);
+}
+
+/* standing on plank, but not too high */
+.pose-plank {
+  transform: translate(-38%, -150px);
+}
+
+/* sinking */
+.pose-sink {
+  transform: translate(-50%, 120px);
 }
 
 .marker {
   position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 18px;
-  height: 28px;
+  bottom: 142px;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 24px;
   border-radius: 10px;
-  background: rgba(94, 219, 255, 0.9);
-  box-shadow: 0 0 22px rgba(94, 219, 255, 0.35);
-  transition: left 250ms ease;
+  background: rgba(94, 219, 255, 0.95);
+  z-index: 5;
 }
 
-/* =========================
-   Characters
-========================= */
-
-.charImg {
-  width: 130px;
-  height: auto;
-  user-select: none;
-  pointer-events: none;
-  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.45));
-  transform-origin: center bottom;
+/* Optional if you still keep these elsewhere */
+.gameCard {
+  width: min(860px, 94vw);
 }
 
-/* Idle breathing (Clash Royale-ish) */
-.idle {
-  animation: breathe 2.8s ease-in-out infinite;
+.questionText {
+  color: #eaf1ff;
+  font-size: 20px;
+  margin-bottom: 14px;
 }
 
-@keyframes breathe {
-  0%   { transform: translateY(0) scale(1); }
-  50%  { transform: translateY(-3px) scale(1.01); }
-  100% { transform: translateY(0) scale(1); }
+.optionGrid {
+  grid-template-columns: 1fr 1fr;
 }
-
-/* Hit shake */
-.hit {
-  animation: hitShake 0.26s ease-in-out 1;
-}
-
-@keyframes hitShake {
-  0% { transform: translateX(0) rotate(0deg); }
-  25% { transform: translateX(-4px) rotate(-2deg); }
-  50% { transform: translateX(4px) rotate(2deg); }
-  75% { transform: translateX(-3px) rotate(-1deg); }
-  100% { transform: translateX(0) rotate(0deg); }
-}
-
-/* Sink / drown */
-.sink {
-  animation: sinkDown 1.1s ease-in forwards;
-}
-
-@keyframes sinkDown {
-  0% { transform: translateY(0); opacity: 1; }
-  100% { transform: translateY(70px); opacity: 0; }
-}
-
-/* Hammer victory */
-.hammer {
-  animation: hammerPop 0.9s ease-in-out infinite alternate;
-}
-
-@keyframes hammerPop {
-  0% { transform: translateY(0) scale(1); }
-  100% { transform: translateY(-6px) scale(1.03); }
-}
-
-/* =========================
-   Meter block
-========================= */
 
 .meterBlock {
   margin: 6px 0 18px;
@@ -171,32 +132,52 @@
   text-align: center;
 }
 
-.questionText {
-  color: #eaf1ff;
-  font-size: 20px;
-  margin-bottom: 14px;
-}
-
-.optionGrid {
-  grid-template-columns: 1fr 1fr;
-}
-
-.resultBox {
-  text-align: center;
-}
-
-.resultTitle {
-  color: #eaf1ff;
-}
-
-/* Responsive */
 @media (max-width: 768px) {
   .tugStage {
-    grid-template-columns: 120px 1fr 120px;
+    min-height: 300px;
   }
-  .charImg {
-    width: 100px;
+
+  .tugArena {
+    height: 270px;
   }
+
+  .plankImg {
+    width: 280px;
+    bottom: 62px;
+  }
+
+  .playerAnchor {
+    left: calc(50% + 85px);
+    width: 200px;
+    height: 200px;
+    bottom: 4px;
+  }
+
+  .playerAvatar {
+    width: 200px;
+    height: 200px;
+  }
+
+  .pose-hang {
+    transform: translate(-50%, 48px);
+  }
+
+  .pose-climb {
+    transform: translate(-50%, -85px);
+  }
+
+  .pose-plank {
+    transform: translate(-50%, -45px);
+  }
+
+  .pose-sink {
+    transform: translate(-50%, 95px);
+  }
+
+  .marker {
+    bottom: 125px;
+  }
+
   .optionGrid {
     grid-template-columns: 1fr;
   }
