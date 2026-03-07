@@ -6,8 +6,8 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [error, setError] = useState(""); // show login errors nicely
-  const [loading, setLoading] = useState(false); // prevent double submit
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -17,23 +17,19 @@ function Login() {
     setLoading(true);
 
     try {
-      const result = await axios.post("http://localhost:3001/login", {
-        email,
-        password,
-      });
+      const result = await axios.post(
+        "http://localhost:3001/login",
+        { email, password },
+        { withCredentials: true }
+      );
 
-      console.log("Login response:", result.data);
-
-      // ✅ Your backend returns: { message: "Success" }
       if (result.data?.message === "Success") {
         navigate("/dashboard");
         return;
       }
 
-      // fallback if backend returns something else
       setError(result.data?.message || "Login failed. Try again.");
     } catch (err) {
-      // Show proper error message from backend (404/401/etc.)
       const msg =
         err?.response?.data?.message ||
         err?.message ||
@@ -53,7 +49,6 @@ function Login() {
             <div className="bg-white p-4 rounded shadow">
               <h2 className="text-center mb-4">Login</h2>
 
-              {/* ✅ Error message UI */}
               {error && (
                 <div className="alert alert-danger py-2" role="alert">
                   {error}
@@ -61,7 +56,6 @@ function Login() {
               )}
 
               <form onSubmit={handleSubmit}>
-                {/* Email */}
                 <div className="mb-3">
                   <label htmlFor="email" className="form-label">
                     <strong>Email</strong>
@@ -77,7 +71,6 @@ function Login() {
                   />
                 </div>
 
-                {/* Password */}
                 <div className="mb-3">
                   <label htmlFor="password" className="form-label">
                     <strong>Password</strong>
