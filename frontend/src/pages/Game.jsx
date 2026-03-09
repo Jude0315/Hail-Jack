@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "../styles/scene.css";
 import "../styles/game.css";
 import Player1Sprite from "../components/Player1Sprite";
@@ -18,12 +19,32 @@ export default function Game() {
   const [loading, setLoading] = useState(true);
   const [locked, setLocked] = useState(false);
   const [loadError, setLoadError] = useState("");
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const [p1Anim, setP1Anim] = useState("HANG_IDLE");
   const [p1Pose, setP1Pose] = useState("HANG"); // HANG | CLIMB | PLANK | SINK
 
   const isLoadingRef = useRef(false);
   const prevMeterRef = useRef(0);
+
+  const handleLogout = async () => {
+    try {
+      setLoggingOut(true);
+
+      await axios.post(
+        "http://localhost:3001/logout",
+        {},
+        { withCredentials: true }
+      );
+
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout failed:", err?.response || err);
+      alert("Logout failed. Please try again.");
+    } finally {
+      setLoggingOut(false);
+    }
+  };
 
   const loadQuestions = async () => {
     if (isLoadingRef.current) return;
@@ -87,21 +108,18 @@ export default function Game() {
       return;
     }
 
-    // Hanging -> climb up onto plank
     if (prevMeter <= 0 && currMeter >= 1) {
       setP1Pose("CLIMB");
       setP1Anim("CLIMB_UP");
       return;
     }
 
-    // Plank -> hanging
     if (prevMeter >= 1 && currMeter <= 0) {
       setP1Pose("HANG");
       setP1Anim(currMeter < 0 ? "PANIC_HANG_IDLE" : "HANG_IDLE");
       return;
     }
 
-    // Already on plank
     if (currMeter >= 1) {
       setP1Pose("PLANK");
       if (streak >= 2) setP1Anim("HYPE_IDLE");
@@ -109,7 +127,6 @@ export default function Game() {
       return;
     }
 
-    // Hanging
     setP1Pose("HANG");
     if (currMeter < 0) setP1Anim("PANIC_HANG_IDLE");
     else setP1Anim("HANG_IDLE");
@@ -207,10 +224,10 @@ export default function Game() {
   };
 
   const getP1Speed = () => {
-    if (p1Anim === "CLIMB_UP") return 0.28;       // slower climb
+    if (p1Anim === "CLIMB_UP") return 0.28;
     if (p1Anim === "BACKFLIP_WIN") return 0.5;
     if (p1Anim === "MINI_PULL") return 0.5;
-    return 0.65; // loops
+    return 0.65;
   };
 
   if (loading) {
@@ -238,7 +255,26 @@ export default function Game() {
         </video>
         <div className="ui">
           <div className="card">
-            <h2 className="title">Failed to Load Questions</h2>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "12px",
+              }}
+            >
+              <h2 className="title" style={{ margin: 0 }}>
+                Failed to Load Questions
+              </h2>
+              <button
+                className="smallBtn"
+                onClick={handleLogout}
+                disabled={loggingOut}
+              >
+                {loggingOut ? "Logging out..." : "Logout"}
+              </button>
+            </div>
+
             <p className="subtitle" style={{ opacity: 0.85 }}>
               {loadError || "Unknown error"}
             </p>
@@ -246,7 +282,10 @@ export default function Game() {
               <button className="smallBtn" onClick={loadQuestions}>
                 Retry
               </button>
-              <button className="smallBtn" onClick={() => navigate("/dashboard")}>
+              <button
+                className="smallBtn"
+                onClick={() => navigate("/dashboard")}
+              >
                 Back
               </button>
             </div>
@@ -266,6 +305,22 @@ export default function Game() {
 
       <div className="ui">
         <div className="card gameCard">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginBottom: "10px",
+            }}
+          >
+            <button
+              className="smallBtn"
+              onClick={handleLogout}
+              disabled={loggingOut}
+            >
+              {loggingOut ? "Logging out..." : "Logout"}
+            </button>
+          </div>
+
           <div className="gameHeader">
             <h2 className="title gameTitle">Tug-of-War Quiz</h2>
             <div className="miniInfo">
@@ -281,7 +336,7 @@ export default function Game() {
                 alt="plank"
                 className="plankImg"
                 style={{
-                  transform: `translateX(calc(-50% + ${meter * 8}px)) rotate(${meter * 1.5}deg)`
+                  transform: `translateX(calc(-50% + ${meter * 8}px)) rotate(${meter * 1.5}deg)`,
                 }}
               />
 
@@ -291,18 +346,18 @@ export default function Game() {
               />
 
               <div
-  className={`playerAnchor pose-${p1Pose.toLowerCase()} ${
-    status === "lose" ? "playerFadeOut" : ""
-  }`}
->
-  <div className="playerAvatar">
-    <Player1Sprite
-      anim={p1Anim}
-      speed={getP1Speed()}
-      onDone={handleP1AnimDone}
-    />
-  </div>
-</div>
+                className={`playerAnchor pose-${p1Pose.toLowerCase()} ${
+                  status === "lose" ? "playerFadeOut" : ""
+                }`}
+              >
+                <div className="playerAvatar">
+                  <Player1Sprite
+                    anim={p1Anim}
+                    speed={getP1Speed()}
+                    onDone={handleP1AnimDone}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -335,7 +390,10 @@ export default function Game() {
                 <button className="smallBtn" onClick={resetGame}>
                   Play Again (New Questions)
                 </button>
-                <button className="smallBtn" onClick={() => navigate("/dashboard")}>
+                <button
+                  className="smallBtn"
+                  onClick={() => navigate("/dashboard")}
+                >
                   Back to Dashboard
                 </button>
               </div>
@@ -351,7 +409,11 @@ export default function Game() {
                     className="smallBtn"
                     onClick={() => submitAnswer(opt)}
                     disabled={locked}
-                    style={locked ? { opacity: 0.6, cursor: "not-allowed" } : undefined}
+                    style={
+                      locked
+                        ? { opacity: 0.6, cursor: "not-allowed" }
+                        : undefined
+                    }
                   >
                     {opt}
                   </button>
@@ -359,7 +421,10 @@ export default function Game() {
               </div>
 
               <div style={{ marginTop: 16, textAlign: "center" }}>
-                <button className="smallBtn" onClick={() => navigate("/dashboard")}>
+                <button
+                  className="smallBtn"
+                  onClick={() => navigate("/dashboard")}
+                >
                   Quit
                 </button>
               </div>
