@@ -21,11 +21,25 @@ export default function Game() {
   const [loadError, setLoadError] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
 
+  const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [wrongAnswers, setWrongAnswers] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
+  const [resultSaved, setResultSaved] = useState(false);
+
   const [p1Anim, setP1Anim] = useState("HANG_IDLE");
   const [p1Pose, setP1Pose] = useState("HANG"); // HANG | CLIMB | PLANK | SINK
 
   const isLoadingRef = useRef(false);
   const prevMeterRef = useRef(0);
+
+  const calculateFinalScore = () => {
+    return (
+      (status === "win" ? 100 : 25) +
+      correctAnswers * 10 +
+      bestStreak * 5 +
+      Math.max(meter, 0) * 5
+    );
+  };
 
   const handleLogout = async () => {
     try {
@@ -132,6 +146,33 @@ export default function Game() {
     else setP1Anim("HANG_IDLE");
   }, [meter, streak, status]);
 
+  useEffect(() => {
+    const saveResult = async () => {
+      if ((status !== "win" && status !== "lose") || resultSaved) return;
+
+      try {
+        await axios.post(
+          "http://localhost:3001/leaderboard/save",
+          {
+            result: status,
+            score: calculateFinalScore(),
+            correctAnswers,
+            wrongAnswers,
+            bestStreak,
+            finalMeter: meter,
+          },
+          { withCredentials: true }
+        );
+
+        setResultSaved(true);
+      } catch (err) {
+        console.error("Failed to save game result:", err?.response || err);
+      }
+    };
+
+    saveResult();
+  }, [status, resultSaved, correctAnswers, wrongAnswers, bestStreak, meter]);
+
   const computerPull = () => {
     const cpuPulls = Math.random() < 0.35;
     if (cpuPulls) setMeter((m) => m - 1);
@@ -144,6 +185,7 @@ export default function Game() {
       await loadQuestions();
       return;
     }
+
     setIdx((prev) => prev + 1);
   };
 
@@ -161,8 +203,15 @@ export default function Game() {
 
     if (correct) {
       const prev = meter;
+
       setMeter((m) => m + 1);
-      setStreak((s) => s + 1);
+      setCorrectAnswers((c) => c + 1);
+
+      setStreak((s) => {
+        const newStreak = s + 1;
+        setBestStreak((best) => Math.max(best, newStreak));
+        return newStreak;
+      });
 
       if (prev >= 1 && status === "playing") {
         setP1Anim("MINI_PULL");
@@ -174,6 +223,7 @@ export default function Game() {
       }, 650);
     } else {
       setMeter((m) => m - 1);
+      setWrongAnswers((w) => w + 1);
       setStreak(0);
 
       setTimeout(async () => {
@@ -189,6 +239,11 @@ export default function Game() {
     setStreak(0);
     setStatus("playing");
     setLocked(false);
+
+    setCorrectAnswers(0);
+    setWrongAnswers(0);
+    setBestStreak(0);
+    setResultSaved(false);
 
     setP1Anim("HANG_IDLE");
     setP1Pose("HANG");
@@ -278,6 +333,7 @@ export default function Game() {
             <p className="subtitle" style={{ opacity: 0.85 }}>
               {loadError || "Unknown error"}
             </p>
+
             <div className="rowBtns" style={{ marginTop: 14 }}>
               <button className="smallBtn" onClick={loadQuestions}>
                 Retry
@@ -385,6 +441,17 @@ export default function Game() {
               <h3 className="resultTitle">
                 {status === "win" ? "You Win 🏆" : "You Lose 🌊"}
               </h3>
+
+              <p style={{ marginTop: 8 }}>
+                Score: <strong>{calculateFinalScore()}</strong>
+              </p>
+              <p>
+                Correct: <strong>{correctAnswers}</strong> | Wrong:{" "}
+                <strong>{wrongAnswers}</strong>
+              </p>
+              <p>
+                Best Streak: <strong>{bestStreak}</strong>
+              </p>
 
               <div className="rowBtns" style={{ marginTop: 14 }}>
                 <button className="smallBtn" onClick={resetGame}>

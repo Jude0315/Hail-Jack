@@ -5,6 +5,7 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo").default;
 const bcrypt = require("bcrypt");
 const PlayerModel = require("./models/Player");
+const GameResultModel = require("./models/GameResult");
 
 const app = express();
 
@@ -298,6 +299,175 @@ app.get("/game/questions", async (req, res) => {
     });
   }
 });
+
+//Leader Board Routes=================================//
+app.post("/leaderboard/save", requireAuth, async (req, res) => {//Save completed game
+  try {
+    const {
+      result,
+      score,
+      correctAnswers,
+      wrongAnswers,
+      bestStreak,
+      finalMeter,
+    } = req.body;
+
+    if (!["win", "lose"].includes(result)) {
+      return res.status(400).json({ message: "Invalid result" });
+    }
+
+    const gameResult = await GameResultModel.create({
+      playerId: req.session.userId,
+      playerName: req.session.userName,
+      result,
+      score: Number(score) || 0,
+      correctAnswers: Number(correctAnswers) || 0,
+      wrongAnswers: Number(wrongAnswers) || 0,
+      bestStreak: Number(bestStreak) || 0,
+      finalMeter: Number(finalMeter) || 0,
+      playedAt: new Date(),
+    });
+
+    return res.status(201).json({
+      message: "Game result saved",
+      gameResult,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Failed to save game result",
+      error: err.message,
+    });
+  }
+});
+
+//Overall player leaderboard
+
+app.get("/leaderboard/players", async (req, res) => {
+  try {
+    const leaderboard = await GameResultModel.aggregate([
+      {
+        $group: {
+          _id: "$playerId",
+          playerName: { $first: "$playerName" },
+          totalScore: { $sum: "$score" },
+          gamesPlayed: { $sum: 1 },
+          wins: {
+            $sum: {
+              $cond: [{ $eq: ["$result", "win"] }, 1, 0],
+            },
+          },
+          losses: {
+            $sum: {
+              $cond: [{ $eq: ["$result", "lose"] }, 1, 0],
+            },
+          },
+          bestStreak: { $max: "$bestStreak" },
+          totalCorrectAnswers: { $sum: "$correctAnswers" },
+          totalWrongAnswers: { $sum: "$wrongAnswers" },
+          lastPlayed: { $max: "$playedAt" },
+        },
+      },
+      {
+        $addFields: {
+          winRate: {
+            $cond: [
+              { $eq: ["$gamesPlayed", 0] },
+              0,
+              {
+                $multiply: [{ $divide: ["$wins", "$gamesPlayed"] }, 100],
+              },
+            ],
+          },
+          accuracy: {
+            $cond: [
+              {
+                $eq: [
+                  { $add: ["$totalCorrectAnswers", "$totalWrongAnswers"] },
+                  0,
+                ],
+              },
+              0,
+              {
+                $multiply: [
+                  {
+                    $divide: [
+                      "$totalCorrectAnswers",
+                      { $add: ["$totalCorrectAnswers", "$totalWrongAnswers"] },
+                    ],
+                  },
+                  100,
+                ],
+              },
+            ],
+          },
+        },
+      },
+      { $sort: { totalScore: -1, wins: -1, bestStreak: -1, lastPlayed: -1 } },
+    ]);
+
+    return res.json({ leaderboard });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Failed to fetch player leaderboard",
+      error: err.message,
+    });
+  }
+});
+
+//Top match session
+app.get("/leaderboard/sessions", async (req, res) => {
+  try {
+    const sessions = await GameResultModel.find({})
+      .sort({ score: -1, playedAt: -1 })
+      .limit(100);
+
+    return res.json({ sessions });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Failed to fetch session leaderboard",
+      error: err.message,
+    });
+  }
+});
+
+//summary stats
+app.get("/leaderboard/summary", async (req, res) => {
+  try {
+    const totalPlayers = await GameResultModel.distinct("playerId");
+    const totalMatches = await GameResultModel.countDocuments();
+
+    const topMatch = await GameResultModel.findOne({})
+      .sort({ score: -1, playedAt: -1 })
+      .lean();
+
+    const topPlayerAgg = await GameResultModel.aggregate([
+      {
+        $group: {
+          _id: "$playerId",
+          playerName: { $first: "$playerName" },
+          totalScore: { $sum: "$score" },
+        },
+      },
+      { $sort: { totalScore: -1 } },
+      { $limit: 1 },
+    ]);
+
+    return res.json({
+      totalPlayers: totalPlayers.length,
+      totalMatches,
+      highestScoreEver: topMatch?.score || 0,
+      topPlayer: topPlayerAgg[0]?.playerName || "-",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Failed to fetch leaderboard summary",
+      error: err.message,
+    });
+  }
+});
+
+
+
 
 // =========================
 // Start Server
