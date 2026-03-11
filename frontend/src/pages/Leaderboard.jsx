@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../styles/scene.css";
+import "../styles/leaderboard.css";
 
 export default function Leaderboard() {
   const navigate = useNavigate();
@@ -85,16 +85,32 @@ export default function Leaderboard() {
     return new Date(date).toLocaleString();
   };
 
+  const getRankBadge = (rank) => {
+    if (rank === 1) return "👑";
+    if (rank === 2) return "🥈";
+    if (rank === 3) return "🥉";
+    return `#${rank}`;
+  };
+
   if (loading) {
     return (
-      <div className="scene">
-        <video className="bgVideo" autoPlay loop muted playsInline>
+      <div className="hail-board-page">
+        <video className="hail-board-video" autoPlay loop muted playsInline>
           <source src="/videos/dashboard.mp4" type="video/mp4" />
         </video>
-        <div className="videoOverlay" />
-        <div className="ui">
-          <div className="card">
-            <h2 className="title">Loading Leaderboard...</h2>
+
+        <div className="hail-board-overlay" />
+        <div className="hail-board-stars" />
+        <div className="hail-board-fog hail-board-fog-one" />
+        <div className="hail-board-fog hail-board-fog-two" />
+        <div className="hail-board-wave hail-board-wave-back" />
+        <div className="hail-board-wave hail-board-wave-front" />
+
+        <div className="hail-board-shell">
+          <div className="hail-loading-card">
+            <div className="hail-loading-orb" />
+            <h2>Loading Hall of Survival...</h2>
+            <p>Gathering the bravest names from the icy sea.</p>
           </div>
         </div>
       </div>
@@ -102,160 +118,140 @@ export default function Leaderboard() {
   }
 
   return (
-    <div className="scene">
-      <video className="bgVideo" autoPlay loop muted playsInline>
+    <div className="hail-board-page">
+      <video className="hail-board-video" autoPlay loop muted playsInline>
         <source src="/videos/dashboard.mp4" type="video/mp4" />
       </video>
-      <div className="videoOverlay" />
 
-      <div className="ui" style={{ padding: "30px 0" }}>
-        <div
-          className="card"
-          style={{
-            width: "min(1100px, 95vw)",
-            maxHeight: "90vh",
-            overflowY: "auto",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 12,
-              flexWrap: "wrap",
-            }}
-          >
-            <div>
-              <h1 className="title" style={{ marginBottom: 8 }}>
-                LEADERBOARD
-              </h1>
-              <p className="subtitle" style={{ marginBottom: 0 }}>
-                Track the best players and top game sessions
+      <div className="hail-board-overlay" />
+      <div className="hail-board-stars" />
+      <div className="hail-board-fog hail-board-fog-one" />
+      <div className="hail-board-fog hail-board-fog-two" />
+      <div className="hail-board-wave hail-board-wave-back" />
+      <div className="hail-board-wave hail-board-wave-mid" />
+      <div className="hail-board-wave hail-board-wave-front" />
+
+      <div className="hail-board-shell">
+        <div className="hail-board-panel">
+          <div className="hail-board-header">
+            <div className="hail-board-title-wrap">
+              <p className="hail-board-kicker">Frozen records</p>
+              <h1 className="hail-board-title">HALL OF SURVIVAL</h1>
+              <p className="hail-board-subtitle">
+                The bravest players, highest scores, and fiercest rescue runs
+                in Hail Jack.
               </p>
             </div>
 
-            <button className="smallBtn" onClick={() => navigate("/dashboard")}>
-              BACK
+            <button
+              className="hail-board-back-btn"
+              onClick={() => navigate("/dashboard")}
+            >
+              ⟵ Back
             </button>
           </div>
 
           {error && (
-            <div
-              style={{
-                marginTop: 16,
-                padding: 12,
-                borderRadius: 10,
-                background: "rgba(255,0,0,0.12)",
-              }}
-            >
+            <div className="hail-board-alert hail-board-alert-error">
               {error}
             </div>
           )}
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-              gap: 12,
-              marginTop: 20,
-            }}
-          >
-            <div className="pill" style={{ padding: 12, textAlign: "center" }}>
-              Total Players: <strong>{summary.totalPlayers}</strong>
+          <div className="hail-summary-grid">
+            <div className="hail-summary-card icy-blue">
+              <span className="hail-summary-label">Total Players</span>
+              <strong className="hail-summary-value">{summary.totalPlayers}</strong>
             </div>
-            <div className="pill" style={{ padding: 12, textAlign: "center" }}>
-              Total Matches: <strong>{summary.totalMatches}</strong>
+
+            <div className="hail-summary-card icy-cyan">
+              <span className="hail-summary-label">Total Matches</span>
+              <strong className="hail-summary-value">{summary.totalMatches}</strong>
             </div>
-            <div className="pill" style={{ padding: 12, textAlign: "center" }}>
-              Highest Score: <strong>{summary.highestScoreEver}</strong>
+
+            <div className="hail-summary-card icy-gold">
+              <span className="hail-summary-label">Highest Score Ever</span>
+              <strong className="hail-summary-value">{summary.highestScoreEver}</strong>
             </div>
-            <div className="pill" style={{ padding: 12, textAlign: "center" }}>
-              #1 Player: <strong>{summary.topPlayer}</strong>
+
+            <div className="hail-summary-card icy-violet">
+              <span className="hail-summary-label">Top Survivor</span>
+              <strong className="hail-summary-value">{summary.topPlayer}</strong>
             </div>
           </div>
 
-          <div style={{ marginTop: 28 }}>
-            <h2 className="title" style={{ fontSize: 28 }}>
-              Overall Players
-            </h2>
+          <section className="hail-section">
+            <div className="hail-section-head">
+              <div>
+                <h2 className="hail-section-title">Overall Players</h2>
+                <p className="hail-section-note">
+                  Search the legends who kept Jack afloat the longest.
+                </p>
+              </div>
 
-            <div
-              style={{
-                display: "flex",
-                gap: 12,
-                flexWrap: "wrap",
-                alignItems: "center",
-                marginTop: 12,
-                marginBottom: 16,
-              }}
-            >
-              <input
-                type="text"
-                placeholder="Search player by name..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setShowAllPlayers(true);
-                }}
-                style={{
-                  flex: 1,
-                  minWidth: 240,
-                  padding: "10px 12px",
-                  borderRadius: 8,
-                  border: "1px solid #ccc",
-                }}
-              />
+              <div className="hail-search-wrap">
+                <input
+                  type="text"
+                  placeholder="Search player by name..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setShowAllPlayers(true);
+                  }}
+                  className="hail-search-input"
+                />
+              </div>
             </div>
 
             {filteredPlayers.length === 0 ? (
-              <p>No players found.</p>
+              <div className="hail-empty-state">
+                No players found in the frozen records.
+              </div>
             ) : (
               <>
-                <div style={{ overflowX: "auto" }}>
-                  <table
-                    style={{
-                      width: "100%",
-                      borderCollapse: "collapse",
-                      marginTop: 10,
-                    }}
-                  >
+                <div className="hail-table-wrap">
+                  <table className="hail-table">
                     <thead>
                       <tr>
-                        <th style={thStyle}>Rank</th>
-                        <th style={thStyle}>Player</th>
-                        <th style={thStyle}>Total Score</th>
-                        <th style={thStyle}>Games</th>
-                        <th style={thStyle}>Wins</th>
-                        <th style={thStyle}>Losses</th>
-                        <th style={thStyle}>Win Rate</th>
-                        <th style={thStyle}>Accuracy</th>
-                        <th style={thStyle}>Best Streak</th>
-                        <th style={thStyle}>Last Played</th>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Total Score</th>
+                        <th>Games</th>
+                        <th>Wins</th>
+                        <th>Losses</th>
+                        <th>Win Rate</th>
+                        <th>Accuracy</th>
+                        <th>Best Streak</th>
+                        <th>Last Played</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {visiblePlayers.map((player, index) => {
-                        const actualRank = filteredPlayers.findIndex(
-                          (p) => p._id === player._id
-                        ) + 1;
+                      {visiblePlayers.map((player) => {
+                        const actualRank =
+                          filteredPlayers.findIndex((p) => p._id === player._id) + 1;
 
                         return (
-                          <tr key={player._id}>
-                            <td style={tdStyle}>{actualRank}</td>
-                            <td style={tdStyle}>{player.playerName}</td>
-                            <td style={tdStyle}>{player.totalScore}</td>
-                            <td style={tdStyle}>{player.gamesPlayed}</td>
-                            <td style={tdStyle}>{player.wins}</td>
-                            <td style={tdStyle}>{player.losses}</td>
-                            <td style={tdStyle}>
-                              {Number(player.winRate || 0).toFixed(1)}%
+                          <tr
+                            key={player._id}
+                            className={actualRank <= 3 ? "is-top-rank" : ""}
+                          >
+                            <td>
+                              <span className={`hail-rank-pill rank-${actualRank}`}>
+                                {getRankBadge(actualRank)}
+                              </span>
                             </td>
-                            <td style={tdStyle}>
-                              {Number(player.accuracy || 0).toFixed(1)}%
+                            <td className="hail-player-name-cell">
+                              <span className="hail-player-name">
+                                {player.playerName || "Unknown"}
+                              </span>
                             </td>
-                            <td style={tdStyle}>{player.bestStreak}</td>
-                            <td style={tdStyle}>{formatDate(player.lastPlayed)}</td>
+                            <td>{player.totalScore}</td>
+                            <td>{player.gamesPlayed}</td>
+                            <td>{player.wins}</td>
+                            <td>{player.losses}</td>
+                            <td>{Number(player.winRate || 0).toFixed(1)}%</td>
+                            <td>{Number(player.accuracy || 0).toFixed(1)}%</td>
+                            <td>{player.bestStreak}</td>
+                            <td>{formatDate(player.lastPlayed)}</td>
                           </tr>
                         );
                       })}
@@ -264,9 +260,9 @@ export default function Leaderboard() {
                 </div>
 
                 {filteredPlayers.length > 10 && (
-                  <div style={{ marginTop: 16, textAlign: "center" }}>
+                  <div className="hail-action-row">
                     <button
-                      className="smallBtn"
+                      className="hail-board-toggle-btn"
                       onClick={() => setShowAllPlayers((prev) => !prev)}
                     >
                       {showAllPlayers ? "Show Top 10 Only" : "Show More Players"}
@@ -275,52 +271,67 @@ export default function Leaderboard() {
                 )}
               </>
             )}
-          </div>
+          </section>
 
-          <div style={{ marginTop: 36 }}>
-            <h2 className="title" style={{ fontSize: 28 }}>
-              Top Match Sessions
-            </h2>
+          <section className="hail-section">
+            <div className="hail-section-head">
+              <div>
+                <h2 className="hail-section-title">Top Match Sessions</h2>
+                <p className="hail-section-note">
+                  The strongest individual rescue attempts across the sea.
+                </p>
+              </div>
+            </div>
 
             {sessions.length === 0 ? (
-              <p>No match sessions yet.</p>
+              <div className="hail-empty-state">
+                No match sessions have been recorded yet.
+              </div>
             ) : (
               <>
-                <div style={{ overflowX: "auto" }}>
-                  <table
-                    style={{
-                      width: "100%",
-                      borderCollapse: "collapse",
-                      marginTop: 10,
-                    }}
-                  >
+                <div className="hail-table-wrap">
+                  <table className="hail-table">
                     <thead>
                       <tr>
-                        <th style={thStyle}>Rank</th>
-                        <th style={thStyle}>Player</th>
-                        <th style={thStyle}>Score</th>
-                        <th style={thStyle}>Result</th>
-                        <th style={thStyle}>Correct</th>
-                        <th style={thStyle}>Wrong</th>
-                        <th style={thStyle}>Best Streak</th>
-                        <th style={thStyle}>Final Meter</th>
-                        <th style={thStyle}>Date</th>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Score</th>
+                        <th>Result</th>
+                        <th>Correct</th>
+                        <th>Wrong</th>
+                        <th>Best Streak</th>
+                        <th>Final Meter</th>
+                        <th>Date</th>
                       </tr>
                     </thead>
                     <tbody>
                       {visibleSessions.map((session, index) => (
-                        <tr key={session._id}>
-                          <td style={tdStyle}>{index + 1}</td>
-                          <td style={tdStyle}>{session.playerName}</td>
-                          <td style={tdStyle}>{session.score}</td>
-                          <td style={tdStyle}>
-                            {session.result === "win" ? "Win 🏆" : "Lose 🌊"}
+                        <tr key={session._id} className={index < 3 ? "is-top-rank" : ""}>
+                          <td>
+                            <span className={`hail-rank-pill rank-${index + 1}`}>
+                              {getRankBadge(index + 1)}
+                            </span>
                           </td>
-                          <td style={tdStyle}>{session.correctAnswers}</td>
-                          <td style={tdStyle}>{session.wrongAnswers}</td>
-                          <td style={tdStyle}>{session.bestStreak}</td>
-                          <td style={tdStyle}>{session.finalMeter}</td>
-                          <td style={tdStyle}>{formatDate(session.playedAt)}</td>
+                          <td className="hail-player-name-cell">
+                            <span className="hail-player-name">
+                              {session.playerName || "Unknown"}
+                            </span>
+                          </td>
+                          <td>{session.score}</td>
+                          <td>
+                            <span
+                              className={`hail-result-pill ${
+                                session.result === "win" ? "win" : "lose"
+                              }`}
+                            >
+                              {session.result === "win" ? "Win 🏆" : "Lose 🌊"}
+                            </span>
+                          </td>
+                          <td>{session.correctAnswers}</td>
+                          <td>{session.wrongAnswers}</td>
+                          <td>{session.bestStreak}</td>
+                          <td>{session.finalMeter}</td>
+                          <td>{formatDate(session.playedAt)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -328,9 +339,9 @@ export default function Leaderboard() {
                 </div>
 
                 {sessions.length > 10 && (
-                  <div style={{ marginTop: 16, textAlign: "center" }}>
+                  <div className="hail-action-row">
                     <button
-                      className="smallBtn"
+                      className="hail-board-toggle-btn"
                       onClick={() => setShowAllSessions((prev) => !prev)}
                     >
                       {showAllSessions ? "Show Top 10 Only" : "Show More Matches"}
@@ -339,21 +350,9 @@ export default function Leaderboard() {
                 )}
               </>
             )}
-          </div>
+          </section>
         </div>
       </div>
     </div>
   );
 }
-
-const thStyle = {
-  textAlign: "left",
-  padding: "10px",
-  borderBottom: "1px solid rgba(255,255,255,0.2)",
-  fontWeight: "bold",
-};
-
-const tdStyle = {
-  padding: "10px",
-  borderBottom: "1px solid rgba(255,255,255,0.1)",
-};

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import "../styles/Signup.css";
 
 function Signup() {
   const [name, setName] = useState("");
@@ -79,120 +80,173 @@ function Signup() {
   const passwordsMatch =
     confirmPassword.length > 0 && password === confirmPassword;
 
+  const passwordStrong = validatePassword(password);
+
   return (
-    <div className="bg-secondary min-vh-100 d-flex align-items-center">
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-12 col-sm-10 col-md-6 col-lg-4">
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-center mb-4">Register</h2>
+    <div className="hail-signup-page">
+      <div className="hail-signup-overlay" />
 
-              {error && (
-                <div className="alert alert-danger py-2" role="alert">
-                  {error}
-                </div>
-              )}
+      <div className="hail-stars layer" />
+      <div className="hail-moon layer" />
+      <div className="hail-moon-glow layer" />
 
-              {success && (
-                <div className="alert alert-success py-2" role="alert">
-                  {success}
-                </div>
-              )}
+      <div className="hail-cloud hail-cloud-1 layer" />
+      <div className="hail-cloud hail-cloud-2 layer" />
+      <div className="hail-cloud hail-cloud-3 layer" />
 
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label htmlFor="name" className="form-label">
-                    <strong>Name</strong>
-                  </label>
-                  <input
-                    id="name"
-                    type="text"
-                    placeholder="Enter Name"
-                    className="form-control"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </div>
+      <div className="hail-snow layer">
+        <span className="snowflake snowflake-1">❄</span>
+        <span className="snowflake snowflake-2">❄</span>
+        <span className="snowflake snowflake-3">❄</span>
+        <span className="snowflake snowflake-4">❄</span>
+        <span className="snowflake snowflake-5">❄</span>
+        <span className="snowflake snowflake-6">❄</span>
+        <span className="snowflake snowflake-7">❄</span>
+        <span className="snowflake snowflake-8">❄</span>
+        <span className="snowflake snowflake-9">❄</span>
+        <span className="snowflake snowflake-10">❄</span>
+        <span className="snowflake snowflake-11">❄</span>
+        <span className="snowflake snowflake-12">❄</span>
+      </div>
 
-                <div className="mb-3">
-                  <label htmlFor="email" className="form-label">
-                    <strong>Email</strong>
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    placeholder="Enter Email"
-                    className="form-control"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
+      <div className="hail-sparkles layer">
+        <span className="spark spark-1" />
+        <span className="spark spark-2" />
+        <span className="spark spark-3" />
+        <span className="spark spark-4" />
+        <span className="spark spark-5" />
+      </div>
 
-                <div className="mb-3">
-                  <label htmlFor="password" className="form-label">
-                    <strong>Password</strong>
-                  </label>
-                  <input
-                    id="password"
-                    type="password"
-                    placeholder="Enter Password"
-                    className="form-control"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <small className="text-muted">
-                    Minimum 8 characters, with uppercase, lowercase, number,
-                    and special character.
-                  </small>
-                </div>
+      <div className="hail-wave hail-wave-back layer" />
+      <div className="hail-wave hail-wave-mid layer" />
+      <div className="hail-wave hail-wave-front layer" />
 
-                <div className="mb-3">
-                  <label htmlFor="confirmPassword" className="form-label">
-                    <strong>Confirm Password</strong>
-                  </label>
-                  <input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="Retype Password"
-                    className="form-control"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                  {confirmPassword && (
-                    <small
-                      className={
-                        passwordsMatch ? "text-success" : "text-danger"
-                      }
-                    >
-                      {passwordsMatch
-                        ? "Passwords match"
-                        : "Passwords do not match"}
-                    </small>
-                  )}
-                </div>
+      <div className="hail-signup-content">
+        <div className="hail-brand">
+          <p className="hail-brand-kicker">Join the adventure</p>
+          <h1 className="hail-title">HAIL JACK</h1>
+          <p className="hail-tagline">
+            Create your account, brave the icy sea, and help Jack survive one
+            question at a time.
+          </p>
 
-                <button
-                  type="submit"
-                  className="btn btn-success w-100"
-                  disabled={loading}
-                >
-                  {loading ? "Registering..." : "Register"}
-                </button>
-
-                <p className="text-center mt-3 mb-2">
-                  Already have an account?
-                </p>
-
-                <Link to="/login" className="btn btn-outline-secondary w-100">
-                  Login
-                </Link>
-              </form>
-            </div>
+          <div className="hail-quote-box">
+            <span className="hail-quote-label">Jack says</span>
+            <p>“New crew? Perfect. I could really use the help out here!”</p>
           </div>
+        </div>
+
+        <div className="hail-signup-card">
+          <div className="hail-card-top">
+            <span className="hail-badge">Crew Registration</span>
+            <h2>Create Account</h2>
+            <p>Sign up and step onto the plank.</p>
+          </div>
+
+          {error && (
+            <div className="hail-message hail-error" role="alert">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="hail-message hail-success" role="alert">
+              {success}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="hail-form">
+            <div className="hail-form-group">
+              <label htmlFor="name">Name</label>
+              <input
+                id="name"
+                type="text"
+                placeholder="Enter your name"
+                className="hail-input"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+
+            <div className="hail-form-group">
+              <label htmlFor="email">Email</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                className="hail-input"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            <div className="hail-form-group">
+              <label htmlFor="password">Password</label>
+              <input
+                id="password"
+                type="password"
+                placeholder="Create a password"
+                className="hail-input"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <small
+                className={`hail-helper ${
+                  password.length > 0
+                    ? passwordStrong
+                      ? "is-good"
+                      : "is-bad"
+                    : ""
+                }`}
+              >
+                Minimum 8 characters, with uppercase, lowercase, number, and
+                special character.
+              </small>
+            </div>
+
+            <div className="hail-form-group">
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <input
+                id="confirmPassword"
+                type="password"
+                placeholder="Retype your password"
+                className="hail-input"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              {confirmPassword && (
+                <small
+                  className={`hail-helper ${
+                    passwordsMatch ? "is-good" : "is-bad"
+                  }`}
+                >
+                  {passwordsMatch
+                    ? "Passwords match"
+                    : "Passwords do not match"}
+                </small>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="hail-signup-btn"
+              disabled={loading}
+            >
+              {loading ? "Creating Crew Pass..." : "Join the Voyage"}
+            </button>
+          </form>
+
+          <div className="hail-divider">
+            <span>Already part of the crew?</span>
+          </div>
+
+          <Link to="/login" className="hail-login-btn-secondary">
+            Back to Login
+          </Link>
         </div>
       </div>
     </div>

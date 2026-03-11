@@ -1,0 +1,599 @@
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap");
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Nunito", sans-serif;
+}
+
+.hail-signup-page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  background:
+    radial-gradient(circle at 50% 15%, rgba(170, 230, 255, 0.22) 0%, rgba(170, 230, 255, 0) 30%),
+    linear-gradient(180deg, #061427 0%, #0a2240 32%, #103a67 65%, #0d5079 100%);
+}
+
+.layer {
+  pointer-events: none;
+}
+
+.hail-signup-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(2, 7, 18, 0.1) 0%,
+    rgba(2, 7, 18, 0.16) 45%,
+    rgba(2, 7, 18, 0.28) 100%
+  );
+  z-index: 0;
+}
+
+.hail-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.9;
+  background-image:
+    radial-gradient(circle at 10% 18%, rgba(255, 255, 255, 0.95) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 18% 8%, rgba(255, 255, 255, 0.7) 0 1px, transparent 2px),
+    radial-gradient(circle at 27% 22%, rgba(255, 255, 255, 0.85) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 36% 11%, rgba(255, 255, 255, 0.75) 0 1px, transparent 2px),
+    radial-gradient(circle at 47% 18%, rgba(255, 255, 255, 0.9) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 58% 9%, rgba(255, 255, 255, 0.7) 0 1px, transparent 2px),
+    radial-gradient(circle at 66% 22%, rgba(255, 255, 255, 0.85) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 75% 14%, rgba(255, 255, 255, 0.8) 0 1px, transparent 2px),
+    radial-gradient(circle at 84% 7%, rgba(255, 255, 255, 0.95) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 91% 20%, rgba(255, 255, 255, 0.8) 0 1px, transparent 2px);
+  animation: twinkle 4.5s ease-in-out infinite alternate;
+}
+
+.hail-moon {
+  position: absolute;
+  top: 70px;
+  right: 10%;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  z-index: 1;
+  background: radial-gradient(circle, #fffde8 0%, #ffeeb8 58%, #ffd772 100%);
+  box-shadow: inset -10px -8px 0 rgba(255, 225, 140, 0.3);
+}
+
+.hail-moon-glow {
+  position: absolute;
+  top: 40px;
+  right: calc(10% - 30px);
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  z-index: 0;
+  background: radial-gradient(
+    circle,
+    rgba(255, 225, 140, 0.35) 0%,
+    rgba(255, 225, 140, 0.08) 45%,
+    rgba(255, 225, 140, 0) 75%
+  );
+  animation: pulseGlow 5s ease-in-out infinite;
+}
+
+.hail-snow {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.snowflake {
+  position: absolute;
+  top: -10%;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1rem;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
+  animation-name: snowfall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.snowflake:nth-child(odd) {
+  opacity: 0.9;
+}
+
+.snowflake:nth-child(even) {
+  opacity: 0.5;
+}
+
+.snowflake-1  { left: 6%;  font-size: 0.8rem;  animation-duration: 10s; animation-delay: 0s; }
+.snowflake-2  { left: 14%; font-size: 1.1rem;  animation-duration: 13s; animation-delay: 1s; }
+.snowflake-3  { left: 22%; font-size: 0.9rem;  animation-duration: 11s; animation-delay: 3s; }
+.snowflake-4  { left: 31%; font-size: 1rem;   animation-duration: 15s; animation-delay: 2s; }
+.snowflake-5  { left: 40%; font-size: 0.75rem; animation-duration: 9s;  animation-delay: 4s; }
+.snowflake-6  { left: 49%; font-size: 1rem;   animation-duration: 12s; animation-delay: 1.5s; }
+.snowflake-7  { left: 58%; font-size: 0.9rem;  animation-duration: 14s; animation-delay: 5s; }
+.snowflake-8  { left: 66%; font-size: 1.15rem; animation-duration: 10s; animation-delay: 2.5s; }
+.snowflake-9  { left: 74%; font-size: 0.8rem;  animation-duration: 13s; animation-delay: 0.5s; }
+.snowflake-10 { left: 82%; font-size: 1rem;   animation-duration: 11s; animation-delay: 6s; }
+.snowflake-11 { left: 90%; font-size: 0.85rem; animation-duration: 15s; animation-delay: 3.5s; }
+.snowflake-12 { left: 96%; font-size: 1rem;   animation-duration: 12s; animation-delay: 1s; }
+
+.hail-wave {
+  position: absolute;
+  left: -50%;
+  width: 200%;
+  border-radius: 45% 55% 0 0 / 100% 100% 0 0;
+}
+
+.hail-wave-back {
+  z-index: 1;
+  bottom: 95px;
+  height: 145px;
+  opacity: 0.45;
+  background: rgba(96, 193, 255, 0.3);
+  animation: waveMove 14s linear infinite;
+}
+
+.hail-wave-mid {
+  z-index: 2;
+  bottom: 42px;
+  height: 175px;
+  opacity: 0.68;
+  background: rgba(45, 151, 223, 0.55);
+  animation: waveMoveReverse 10s linear infinite;
+}
+
+.hail-wave-front {
+  z-index: 3;
+  bottom: -10px;
+  height: 230px;
+  opacity: 0.92;
+  background: rgba(18, 111, 177, 0.8);
+  animation: waveMove 7.5s linear infinite;
+}
+
+.hail-signup-content {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  max-width: 1180px;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 52px;
+  align-items: center;
+}
+
+.hail-brand {
+  color: #f7fbff;
+  padding: 10px 6px;
+}
+
+.hail-brand-kicker {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #bde9ff;
+}
+
+.hail-title {
+  margin: 0;
+  font-family: "Fredoka", sans-serif;
+  font-size: clamp(3.1rem, 7vw, 6rem);
+  line-height: 0.92;
+  letter-spacing: 0.04em;
+  color: #fff5cf;
+  text-shadow:
+    0 4px 0 #8e5718,
+    0 10px 24px rgba(0, 0, 0, 0.35);
+  animation: titleFloat 4s ease-in-out infinite;
+}
+
+.hail-tagline {
+  margin: 22px 0 0;
+  max-width: 540px;
+  font-size: 1.12rem;
+  line-height: 1.75;
+  color: #e2f4ff;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.hail-quote-box {
+  margin-top: 28px;
+  max-width: 430px;
+  padding: 16px 18px;
+  border: 2px solid rgba(190, 230, 255, 0.25);
+  border-radius: 20px;
+  background: rgba(10, 34, 64, 0.28);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+}
+
+.hail-quote-label {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9edfff;
+}
+
+.hail-quote-box p {
+  margin: 0;
+  color: #f4fbff;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.hail-signup-card {
+  position: relative;
+  background: linear-gradient(180deg, #f8df9d 0%, #e7bb68 58%, #cf8f41 100%);
+  border: 3px solid #7c4f1d;
+  border-radius: 28px;
+  padding: 32px 28px 26px;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.32),
+    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+  animation: cardFloat 6s ease-in-out infinite;
+}
+
+.hail-signup-card::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border-radius: 20px;
+  border: 1px dashed rgba(95, 55, 15, 0.12);
+  pointer-events: none;
+}
+
+.hail-card-top {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.hail-badge {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(12, 53, 95, 0.14);
+  color: #18385f;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hail-card-top h2 {
+  margin: 0 0 8px;
+  font-family: "Fredoka", sans-serif;
+  font-size: 2rem;
+  color: #4e2d0b;
+}
+
+.hail-card-top p {
+  margin: 0;
+  color: #644015;
+  font-weight: 700;
+}
+
+.hail-message {
+  position: relative;
+  z-index: 1;
+  margin: 18px 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-weight: 700;
+}
+
+.hail-error {
+  background: rgba(179, 33, 33, 0.12);
+  border: 1.5px solid rgba(179, 33, 33, 0.3);
+  color: #721414;
+}
+
+.hail-success {
+  background: rgba(26, 135, 84, 0.12);
+  border: 1.5px solid rgba(26, 135, 84, 0.28);
+  color: #0f6d42;
+}
+
+.hail-form {
+  position: relative;
+  z-index: 1;
+}
+
+.hail-form-group {
+  margin-bottom: 18px;
+}
+
+.hail-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #4f2f0d;
+  font-weight: 800;
+}
+
+.hail-input {
+  width: 100%;
+  border: 2px solid #9d682b;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #23344a;
+  background: rgba(255, 249, 236, 0.96);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.hail-input::placeholder {
+  color: #8d8d8d;
+  font-weight: 600;
+}
+
+.hail-input:focus {
+  border-color: #2a7fc3;
+  box-shadow:
+    0 0 0 4px rgba(42, 127, 195, 0.18),
+    inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+.hail-helper {
+  display: block;
+  margin-top: 8px;
+  color: #6f5a41;
+  font-weight: 700;
+  line-height: 1.45;
+  font-size: 0.84rem;
+}
+
+.hail-helper.is-good {
+  color: #11784a;
+}
+
+.hail-helper.is-bad {
+  color: #9d1d1d;
+}
+
+.hail-signup-btn,
+.hail-login-btn-secondary {
+  width: 100%;
+  border: none;
+  border-radius: 18px;
+  padding: 14px 18px;
+  font-size: 1rem;
+  font-weight: 900;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease, filter 0.18s ease;
+  cursor: pointer;
+}
+
+.hail-signup-btn {
+  margin-top: 14px;
+  color: #ffffff;
+  background: linear-gradient(180deg, #32bc8d 0%, #0c8a62 100%);
+  box-shadow: 0 10px 20px rgba(12, 138, 98, 0.28);
+}
+
+.hail-signup-btn:hover:not(:disabled) {
+  transform: translateY(-4px) scale(1.03);
+  filter: brightness(1.04);
+}
+
+.hail-signup-btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+}
+
+.hail-signup-btn:disabled {
+  opacity: 0.76;
+  cursor: not-allowed;
+}
+
+.hail-login-btn-secondary {
+  display: inline-block;
+  background: rgba(255, 248, 232, 0.75);
+  border: 2px solid #8d5b24;
+  color: #5a340d;
+  box-shadow: 0 8px 14px rgba(92, 56, 18, 0.12);
+}
+
+.hail-login-btn-secondary:hover {
+  transform: translateY(-3px);
+  color: #492807;
+}
+
+.hail-divider {
+  position: relative;
+  z-index: 1;
+  margin: 22px 0 18px;
+  text-align: center;
+}
+
+.hail-divider span {
+  display: inline-block;
+  padding: 0 12px;
+  color: #69411a;
+  font-weight: 800;
+}
+
+@keyframes twinkle {
+  0% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes pulseGlow {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+}
+
+@keyframes snowfall {
+  0% {
+    transform: translateY(-10vh) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(50vh) translateX(16px) rotate(120deg);
+  }
+  100% {
+    transform: translateY(110vh) translateX(-18px) rotate(240deg);
+    opacity: 0.2;
+  }
+}
+
+@keyframes waveMove {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(12%) translateY(8px);
+  }
+  100% {
+    transform: translateX(24%) translateY(0);
+  }
+}
+
+@keyframes waveMoveReverse {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(-10%) translateY(10px);
+  }
+  100% {
+    transform: translateX(-20%) translateY(0);
+  }
+}
+
+@keyframes cardFloat {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes titleFloat {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 980px) {
+  .hail-signup-content {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    max-width: 620px;
+  }
+
+  .hail-brand {
+    text-align: center;
+  }
+
+  .hail-tagline,
+  .hail-quote-box {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .hail-title {
+    font-size: 2.5rem;
+  }
+
+  .hail-quote-box {
+    display: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .hail-signup-page {
+    padding: 22px 14px;
+  }
+
+  .hail-title {
+    font-size: 2.8rem;
+  }
+
+  .hail-tagline {
+    font-size: 1rem;
+  }
+
+  .hail-signup-card {
+    padding: 24px 18px 20px;
+    border-radius: 22px;
+  }
+
+  .hail-card-top h2 {
+    font-size: 1.7rem;
+  }
+
+  .hail-input,
+  .hail-signup-btn,
+  .hail-login-btn-secondary {
+    padding: 13px 14px;
+  }
+
+  .hail-moon {
+    width: 84px;
+    height: 84px;
+    top: 58px;
+    right: 7%;
+  }
+
+  .hail-moon-glow {
+    width: 130px;
+    height: 130px;
+    top: 35px;
+    right: calc(7% - 20px);
+  }
+
+  .hail-wave-front {
+    height: 180px;
+  }
+}

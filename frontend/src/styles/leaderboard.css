@@ -1,0 +1,580 @@
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap");
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Nunito", sans-serif;
+}
+
+.hail-board-page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(180deg, #061427 0%, #0c2340 35%, #103a67 68%, #0d5079 100%);
+  color: #f4fbff;
+}
+
+.hail-board-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.34;
+  z-index: 0;
+}
+
+.hail-board-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(circle at top, rgba(128, 218, 255, 0.12) 0%, transparent 34%),
+    linear-gradient(180deg, rgba(2, 8, 20, 0.38) 0%, rgba(2, 8, 20, 0.56) 60%, rgba(2, 8, 20, 0.72) 100%);
+}
+
+.hail-board-stars {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.55;
+  background-image:
+    radial-gradient(circle at 10% 16%, rgba(255,255,255,0.95) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 20% 9%, rgba(255,255,255,0.75) 0 1px, transparent 2px),
+    radial-gradient(circle at 34% 18%, rgba(255,255,255,0.9) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 48% 10%, rgba(255,255,255,0.8) 0 1px, transparent 2px),
+    radial-gradient(circle at 63% 15%, rgba(255,255,255,0.9) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 77% 11%, rgba(255,255,255,0.7) 0 1px, transparent 2px),
+    radial-gradient(circle at 89% 19%, rgba(255,255,255,0.9) 0 1.5px, transparent 2.5px);
+  animation: hailTwinkle 5s ease-in-out infinite alternate;
+}
+
+.hail-board-fog {
+  position: fixed;
+  left: -20%;
+  width: 140%;
+  height: 180px;
+  z-index: 1;
+  filter: blur(28px);
+  background: rgba(184, 232, 255, 0.1);
+  animation: hailFogDrift 18s linear infinite;
+}
+
+.hail-board-fog-one {
+  top: 90px;
+}
+
+.hail-board-fog-two {
+  top: 170px;
+  animation-duration: 24s;
+  opacity: 0.75;
+}
+
+.hail-board-wave {
+  position: fixed;
+  left: -20%;
+  width: 140%;
+  border-radius: 45% 55% 0 0 / 100% 100% 0 0;
+  z-index: 1;
+}
+
+.hail-board-wave-back {
+  bottom: 70px;
+  height: 150px;
+  background: rgba(86, 176, 235, 0.16);
+  animation: hailWaveMove 16s ease-in-out infinite;
+}
+
+.hail-board-wave-mid {
+  bottom: 25px;
+  height: 180px;
+  background: rgba(48, 142, 205, 0.22);
+  animation: hailWaveMoveReverse 12s ease-in-out infinite;
+}
+
+.hail-board-wave-front {
+  bottom: -20px;
+  height: 220px;
+  background: rgba(18, 111, 177, 0.34);
+  animation: hailWaveMove 8s ease-in-out infinite;
+}
+
+.hail-board-shell {
+  position: relative;
+  z-index: 3;
+  min-height: 100vh;
+  padding: 34px 20px 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hail-board-panel {
+  width: min(1220px, 96vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 28px;
+  border-radius: 32px;
+  border: 1px solid rgba(180, 231, 255, 0.18);
+  background:
+    linear-gradient(180deg, rgba(6, 21, 40, 0.78) 0%, rgba(8, 28, 53, 0.86) 100%);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.hail-board-panel::-webkit-scrollbar {
+  width: 10px;
+}
+
+.hail-board-panel::-webkit-scrollbar-thumb {
+  background: rgba(138, 206, 255, 0.3);
+  border-radius: 999px;
+}
+
+.hail-board-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.hail-board-kicker {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #9adfff;
+}
+
+.hail-board-title {
+  margin: 0;
+  font-family: "Fredoka", sans-serif;
+  font-size: clamp(2.3rem, 4vw, 4rem);
+  line-height: 0.95;
+  color: #eefcff;
+  text-shadow:
+    0 0 24px rgba(86, 198, 255, 0.15),
+    0 6px 24px rgba(0, 0, 0, 0.25);
+}
+
+.hail-board-subtitle {
+  margin: 14px 0 0;
+  max-width: 720px;
+  color: #cfefff;
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+.hail-board-back-btn,
+.hail-board-toggle-btn {
+  border: none;
+  border-radius: 16px;
+  padding: 12px 18px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.hail-board-back-btn {
+  background: linear-gradient(180deg, #2ea9ff 0%, #135ec2 100%);
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(19, 94, 194, 0.28);
+}
+
+.hail-board-toggle-btn {
+  background: linear-gradient(180deg, #2fb989 0%, #0f7f5d 100%);
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(15, 127, 93, 0.24);
+}
+
+.hail-board-back-btn:hover,
+.hail-board-toggle-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  filter: brightness(1.04);
+}
+
+.hail-board-alert {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-weight: 700;
+}
+
+.hail-board-alert-error {
+  color: #ffd0d0;
+  background: rgba(175, 36, 36, 0.18);
+  border: 1px solid rgba(255, 136, 136, 0.18);
+}
+
+.hail-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.hail-summary-card {
+  position: relative;
+  padding: 18px 18px 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  overflow: hidden;
+}
+
+.hail-summary-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.hail-summary-card.icy-blue::before {
+  background: linear-gradient(135deg, #70d3ff 0%, transparent 60%);
+}
+
+.hail-summary-card.icy-cyan::before {
+  background: linear-gradient(135deg, #7bf2ff 0%, transparent 60%);
+}
+
+.hail-summary-card.icy-gold::before {
+  background: linear-gradient(135deg, #ffd36d 0%, transparent 60%);
+}
+
+.hail-summary-card.icy-violet::before {
+  background: linear-gradient(135deg, #a894ff 0%, transparent 60%);
+}
+
+.hail-summary-label {
+  display: block;
+  margin-bottom: 10px;
+  color: #bfe9ff;
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.hail-summary-value {
+  position: relative;
+  z-index: 1;
+  font-size: 1.9rem;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.hail-section {
+  margin-top: 28px;
+  padding: 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(182, 229, 255, 0.1);
+  background: rgba(255,255,255,0.035);
+}
+
+.hail-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.hail-section-title {
+  margin: 0;
+  font-family: "Fredoka", sans-serif;
+  font-size: 1.9rem;
+  color: #f3fdff;
+}
+
+.hail-section-note {
+  margin: 6px 0 0;
+  color: #beddff;
+  line-height: 1.6;
+}
+
+.hail-search-wrap {
+  min-width: min(380px, 100%);
+}
+
+.hail-search-input {
+  width: 100%;
+  padding: 13px 15px;
+  border-radius: 16px;
+  border: 1px solid rgba(182, 229, 255, 0.18);
+  background: rgba(7, 25, 44, 0.75);
+  color: #f4fbff;
+  font-size: 0.98rem;
+  font-weight: 700;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.hail-search-input::placeholder {
+  color: #92b3c9;
+}
+
+.hail-search-input:focus {
+  border-color: rgba(97, 195, 255, 0.75);
+  box-shadow: 0 0 0 4px rgba(63, 167, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+.hail-table-wrap {
+  overflow-x: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(180, 231, 255, 0.08);
+  background: rgba(5, 18, 35, 0.5);
+}
+
+.hail-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 980px;
+}
+
+.hail-table thead th {
+  text-align: left;
+  padding: 15px 14px;
+  background: rgba(130, 212, 255, 0.08);
+  color: #d7f4ff;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid rgba(180, 231, 255, 0.1);
+}
+
+.hail-table tbody td {
+  padding: 14px;
+  color: #eef9ff;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.hail-table tbody tr {
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.hail-table tbody tr:hover {
+  background: rgba(111, 205, 255, 0.06);
+}
+
+.hail-table tbody tr.is-top-rank {
+  background: rgba(255, 234, 173, 0.04);
+}
+
+.hail-player-name-cell {
+  min-width: 180px;
+}
+
+.hail-player-name {
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.hail-rank-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 54px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.9rem;
+}
+
+.hail-rank-pill.rank-1 {
+  background: linear-gradient(180deg, #ffd96d 0%, #d89d1a 100%);
+  color: #442a00;
+}
+
+.hail-rank-pill.rank-2 {
+  background: linear-gradient(180deg, #eef3f7 0%, #aebfcb 100%);
+  color: #22313d;
+}
+
+.hail-rank-pill.rank-3 {
+  background: linear-gradient(180deg, #ffc697 0%, #bb7745 100%);
+  color: #44240d;
+}
+
+.hail-result-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.hail-result-pill.win {
+  background: rgba(41, 186, 119, 0.18);
+  color: #7ff7bf;
+  border: 1px solid rgba(41, 186, 119, 0.22);
+}
+
+.hail-result-pill.lose {
+  background: rgba(62, 156, 255, 0.14);
+  color: #a7d9ff;
+  border: 1px solid rgba(62, 156, 255, 0.16);
+}
+
+.hail-action-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.hail-empty-state {
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.04);
+  color: #d4eeff;
+  font-weight: 700;
+}
+
+.hail-loading-card {
+  width: min(460px, 92vw);
+  padding: 34px 28px;
+  text-align: center;
+  border-radius: 28px;
+  background: rgba(6, 21, 40, 0.82);
+  border: 1px solid rgba(180, 231, 255, 0.15);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(14px);
+}
+
+.hail-loading-card h2 {
+  margin: 10px 0 10px;
+  font-family: "Fredoka", sans-serif;
+  color: #f2fbff;
+}
+
+.hail-loading-card p {
+  margin: 0;
+  color: #ccecff;
+}
+
+.hail-loading-orb {
+  width: 74px;
+  height: 74px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(145, 232, 255, 0.95) 0%, rgba(57, 175, 255, 0.75) 45%, rgba(57, 175, 255, 0.08) 70%, rgba(57, 175, 255, 0) 100%);
+  animation: hailPulseOrb 2.2s ease-in-out infinite;
+}
+
+@keyframes hailTwinkle {
+  0% { opacity: 0.35; }
+  100% { opacity: 0.7; }
+}
+
+@keyframes hailFogDrift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(8%); }
+}
+
+@keyframes hailWaveMove {
+  0% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(3%) translateY(8px); }
+  100% { transform: translateX(0) translateY(0); }
+}
+
+@keyframes hailWaveMoveReverse {
+  0% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(-3%) translateY(10px); }
+  100% { transform: translateX(0) translateY(0); }
+}
+
+@keyframes hailPulseOrb {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.78;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.92);
+    opacity: 0.78;
+  }
+}
+
+@media (max-width: 900px) {
+  .hail-board-panel {
+    padding: 20px;
+    max-height: none;
+  }
+
+  .hail-board-shell {
+    align-items: stretch;
+    padding: 18px 12px 24px;
+  }
+
+  .hail-section {
+    padding: 16px;
+  }
+
+  .hail-section-title {
+    font-size: 1.5rem;
+  }
+
+  .hail-search-wrap {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .hail-board-title {
+    font-size: 2.2rem;
+  }
+
+  .hail-summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hail-summary-value {
+    font-size: 1.5rem;
+  }
+
+  .hail-board-back-btn,
+  .hail-board-toggle-btn {
+    width: 100%;
+  }
+
+  .hail-board-header {
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .hail-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hail-board-title {
+    font-size: 1.9rem;
+  }
+
+  .hail-board-subtitle,
+  .hail-section-note {
+    font-size: 0.94rem;
+  }
+}
