@@ -1,0 +1,853 @@
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap");
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Nunito", sans-serif;
+}
+
+.hail-dashboard {
+  --mx: 0;
+  --my: 0;
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  --card-rx: 0deg;
+  --card-ry: 0deg;
+
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  color: #f5fcff;
+  background: linear-gradient(180deg, #04101f 0%, #08203d 30%, #0b3862 66%, #0c537d 100%);
+}
+
+.hail-sky-gradient {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 14%, rgba(180, 234, 255, 0.13) 0%, rgba(180, 234, 255, 0) 24%),
+    radial-gradient(circle at 80% 18%, rgba(98, 196, 255, 0.08) 0%, rgba(98, 196, 255, 0) 20%),
+    linear-gradient(180deg, rgba(3, 9, 18, 0.08) 0%, rgba(3, 9, 18, 0.24) 58%, rgba(3, 9, 18, 0.38) 100%);
+  z-index: 0;
+}
+
+.hail-moon {
+  position: absolute;
+  top: 64px;
+  right: 9%;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffde7 0%, #fff0be 52%, #ffd978 100%);
+  box-shadow: inset -10px -8px 0 rgba(255, 224, 135, 0.28);
+  transform: translate(calc(var(--mx) * -14px), calc(var(--my) * -14px));
+  transition: transform 0.18s ease-out;
+  z-index: 1;
+}
+
+.hail-moon-glow {
+  position: absolute;
+  top: 22px;
+  right: calc(9% - 44px);
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 228, 145, 0.4) 0%, rgba(255, 228, 145, 0.12) 42%, rgba(255, 228, 145, 0) 74%);
+  animation: moonPulse 5s ease-in-out infinite;
+  transform: translate(calc(var(--mx) * -8px), calc(var(--my) * -8px));
+  transition: transform 0.18s ease-out;
+  z-index: 0;
+}
+
+.hail-moon-rays {
+  position: absolute;
+  top: -10px;
+  right: calc(9% - 94px);
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(255, 243, 180, 0) 0deg,
+      rgba(255, 243, 180, 0.12) 18deg,
+      rgba(255, 243, 180, 0) 34deg,
+      rgba(255, 243, 180, 0.08) 60deg,
+      rgba(255, 243, 180, 0) 88deg,
+      rgba(255, 243, 180, 0.08) 116deg,
+      rgba(255, 243, 180, 0) 150deg,
+      rgba(255, 243, 180, 0.1) 182deg,
+      rgba(255, 243, 180, 0) 220deg,
+      rgba(255, 243, 180, 0.08) 254deg,
+      rgba(255, 243, 180, 0) 290deg,
+      rgba(255, 243, 180, 0.1) 328deg,
+      rgba(255, 243, 180, 0) 360deg
+    );
+  filter: blur(10px);
+  opacity: 0.55;
+  animation: rotateRays 28s linear infinite;
+  z-index: 0;
+}
+
+.hail-star-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hail-star-layer-a {
+  transform: translate(calc(var(--mx) * 10px), calc(var(--my) * 10px));
+  transition: transform 0.2s ease-out;
+}
+
+.hail-star-layer-b {
+  transform: translate(calc(var(--mx) * -6px), calc(var(--my) * -6px));
+  transition: transform 0.2s ease-out;
+}
+
+.hail-star {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+  animation: twinkle 4s ease-in-out infinite;
+}
+
+.star-a-1 { top: 10%; left: 7%; width: 2px; height: 2px; animation-delay: 0s; }
+.star-a-2 { top: 17%; left: 15%; width: 3px; height: 3px; animation-delay: .6s; }
+.star-a-3 { top: 12%; left: 29%; width: 2px; height: 2px; animation-delay: 1.1s; }
+.star-a-4 { top: 20%; left: 38%; width: 3px; height: 3px; animation-delay: .4s; }
+.star-a-5 { top: 9%; left: 50%; width: 2px; height: 2px; animation-delay: 1.4s; }
+.star-a-6 { top: 16%; left: 61%; width: 3px; height: 3px; animation-delay: .8s; }
+.star-a-7 { top: 11%; left: 71%; width: 2px; height: 2px; animation-delay: 1.8s; }
+.star-a-8 { top: 19%; left: 83%; width: 3px; height: 3px; animation-delay: 1.2s; }
+.star-a-9 { top: 25%; left: 91%; width: 2px; height: 2px; animation-delay: .2s; }
+
+.star-b-1 { top: 7%; left: 12%; width: 1.5px; height: 1.5px; animation-delay: .4s; }
+.star-b-2 { top: 14%; left: 22%; width: 2px; height: 2px; animation-delay: 1s; }
+.star-b-3 { top: 8%; left: 35%; width: 1.5px; height: 1.5px; animation-delay: 1.7s; }
+.star-b-4 { top: 21%; left: 46%; width: 2px; height: 2px; animation-delay: .5s; }
+.star-b-5 { top: 13%; left: 56%; width: 1.5px; height: 1.5px; animation-delay: 1.3s; }
+.star-b-6 { top: 22%; left: 68%; width: 2px; height: 2px; animation-delay: .9s; }
+.star-b-7 { top: 10%; left: 77%; width: 1.5px; height: 1.5px; animation-delay: 1.6s; }
+.star-b-8 { top: 17%; left: 88%; width: 2px; height: 2px; animation-delay: .3s; }
+.star-b-9 { top: 5%; left: 94%; width: 1.5px; height: 1.5px; animation-delay: 1.9s; }
+
+.hail-aurora {
+  position: absolute;
+  top: 6%;
+  width: 60%;
+  height: 200px;
+  filter: blur(24px);
+  opacity: 0.24;
+  z-index: 0;
+  mix-blend-mode: screen;
+}
+
+.aurora-1 {
+  left: 6%;
+  background: linear-gradient(90deg, rgba(92, 255, 222, 0) 0%, rgba(92, 255, 222, 0.28) 36%, rgba(120, 163, 255, 0.18) 72%, rgba(120, 163, 255, 0) 100%);
+  animation: auroraShift 14s ease-in-out infinite;
+}
+
+.aurora-2 {
+  right: 2%;
+  background: linear-gradient(90deg, rgba(133, 255, 235, 0) 0%, rgba(133, 255, 235, 0.14) 40%, rgba(153, 183, 255, 0.2) 70%, rgba(153, 183, 255, 0) 100%);
+  animation: auroraShift 18s ease-in-out infinite reverse;
+}
+
+.hail-fog {
+  position: absolute;
+  left: -15%;
+  width: 130%;
+  height: 170px;
+  filter: blur(30px);
+  background: rgba(198, 238, 255, 0.1);
+  z-index: 1;
+}
+
+.fog-1 { top: 16%; animation: fogDrift 24s linear infinite; }
+.fog-2 { top: 24%; opacity: 0.68; animation: fogDrift 30s linear infinite reverse; }
+.fog-3 { top: 34%; opacity: 0.48; animation: fogDrift 38s linear infinite; }
+.fog-4 { top: 46%; opacity: 0.34; animation: fogDrift 46s linear infinite reverse; }
+
+.hail-glacier-range {
+  position: absolute;
+  left: -5%;
+  width: 110%;
+  display: flex;
+  align-items: flex-end;
+  gap: 1%;
+  pointer-events: none;
+}
+
+.glacier-far {
+  bottom: 30%;
+  z-index: 1;
+  transform: translate(calc(var(--mx) * 5px), calc(var(--my) * 3px));
+  transition: transform 0.18s ease-out;
+  opacity: 0.55;
+}
+
+.glacier-back {
+  bottom: 24%;
+  z-index: 1;
+  transform: translate(calc(var(--mx) * 8px), calc(var(--my) * 4px));
+  transition: transform 0.18s ease-out;
+  opacity: 0.78;
+}
+
+.glacier-mid {
+  bottom: 16%;
+  z-index: 2;
+  transform: translate(calc(var(--mx) * 14px), calc(var(--my) * 6px));
+  transition: transform 0.18s ease-out;
+}
+
+.glacier {
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  background: linear-gradient(180deg, rgba(225, 248, 255, 0.88) 0%, rgba(145, 213, 255, 0.78) 48%, rgba(86, 150, 214, 0.9) 100%);
+  box-shadow: inset -18px 0 0 rgba(255, 255, 255, 0.08);
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+  animation: glacierBob 8s ease-in-out infinite;
+}
+
+.gf1 { width: 12%; height: 70px; animation-delay: 0s; }
+.gf2 { width: 18%; height: 110px; animation-delay: .8s; }
+.gf3 { width: 10%; height: 65px; animation-delay: 1.4s; }
+.gf4 { width: 14%; height: 85px; animation-delay: .5s; }
+.gf5 { width: 16%; height: 95px; animation-delay: 1.2s; }
+
+.gb1 { width: 14%; height: 100px; animation-delay: 0s; }
+.gb2 { width: 19%; height: 145px; animation-delay: .8s; }
+.gb3 { width: 12%; height: 90px; animation-delay: 1.6s; }
+.gb4 { width: 16%; height: 120px; animation-delay: .5s; }
+
+.gm1 { width: 18%; height: 165px; animation-delay: 0s; }
+.gm2 { width: 24%; height: 220px; animation-delay: .9s; }
+.gm3 { width: 17%; height: 155px; animation-delay: 1.7s; }
+
+.hail-icebergs-layer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12%;
+  height: 120px;
+  z-index: 3;
+  pointer-events: none;
+  transform: translate(calc(var(--mx) * 20px), calc(var(--my) * 6px));
+  transition: transform 0.18s ease-out;
+}
+
+.hail-iceberg {
+  position: absolute;
+  bottom: 0;
+  clip-path: polygon(15% 100%, 0% 45%, 18% 28%, 42% 0%, 66% 18%, 100% 42%, 88% 100%);
+  background: linear-gradient(180deg, rgba(231, 249, 255, 0.96) 0%, rgba(163, 223, 255, 0.82) 45%, rgba(75, 138, 199, 0.95) 100%);
+  box-shadow: inset -16px 0 0 rgba(255, 255, 255, 0.08);
+  animation: icebergFloat 9s ease-in-out infinite;
+}
+
+.ib1 { left: 10%; width: 90px; height: 58px; animation-delay: 0s; }
+.ib2 { left: 28%; width: 120px; height: 72px; animation-delay: 1.2s; }
+.ib3 { left: 63%; width: 100px; height: 62px; animation-delay: .7s; }
+.ib4 { left: 82%; width: 72px; height: 46px; animation-delay: 1.8s; }
+
+.hail-shards-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  transform: translate(calc(var(--mx) * 16px), calc(var(--my) * 10px));
+  transition: transform 0.18s ease-out;
+}
+
+.hail-ice-shard {
+  position: absolute;
+  width: 18px;
+  height: 56px;
+  background: linear-gradient(180deg, rgba(226, 248, 255, 0.95) 0%, rgba(129, 219, 255, 0.45) 56%, rgba(129, 219, 255, 0.05) 100%);
+  clip-path: polygon(50% 0%, 100% 35%, 70% 100%, 30% 100%, 0% 35%);
+  filter: drop-shadow(0 0 12px rgba(174, 236, 255, 0.25));
+  opacity: 0.72;
+  animation: shardFloat 10s ease-in-out infinite;
+}
+
+.shard-1 { top: 18%; left: 10%; transform: rotate(-18deg); }
+.shard-2 { top: 10%; left: 25%; transform: rotate(14deg); }
+.shard-3 { top: 22%; left: 40%; transform: rotate(-10deg); }
+.shard-4 { top: 14%; left: 58%; transform: rotate(18deg); }
+.shard-5 { top: 20%; left: 73%; transform: rotate(-14deg); }
+.shard-6 { top: 28%; left: 87%; transform: rotate(12deg); }
+.shard-7 { top: 44%; left: 12%; transform: rotate(-9deg); }
+.shard-8 { top: 50%; left: 82%; transform: rotate(16deg); }
+.shard-9 { top: 60%; left: 30%; transform: rotate(-15deg); }
+.shard-10 { top: 56%; left: 64%; transform: rotate(8deg); }
+.shard-11 { top: 34%; left: 52%; transform: rotate(-12deg); }
+.shard-12 { top: 66%; left: 72%; transform: rotate(18deg); }
+
+.hail-cursor-ripple {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hail-cursor-ripple::before,
+.hail-cursor-ripple::after {
+  content: "";
+  position: absolute;
+  left: var(--mouse-x);
+  top: var(--mouse-y);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.hail-cursor-ripple::before {
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(145, 232, 255, 0.16) 0%, rgba(145, 232, 255, 0.05) 30%, rgba(145, 232, 255, 0) 70%);
+  filter: blur(6px);
+}
+
+.hail-cursor-ripple::after {
+  width: 90px;
+  height: 90px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, rgba(255,255,255,0.05) 45%, rgba(255,255,255,0) 70%);
+}
+
+.hail-snow-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.hail-snowflake {
+  position: absolute;
+  top: -12%;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 0 9px rgba(255, 255, 255, 0.24);
+  animation-name: snowfall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  transform: translateX(calc(var(--mx) * 18px));
+}
+
+.snow-1  { left: 3%;  font-size: .72rem; animation-duration: 9s;  animation-delay: 0s; }
+.snow-2  { left: 7%;  font-size: .9rem;  animation-duration: 11s; animation-delay: .8s; }
+.snow-3  { left: 11%; font-size: .82rem; animation-duration: 13s; animation-delay: 1.4s; }
+.snow-4  { left: 15%; font-size: 1rem;  animation-duration: 10s; animation-delay: 2.1s; }
+.snow-5  { left: 19%; font-size: .7rem;  animation-duration: 8.5s; animation-delay: 3s; }
+.snow-6  { left: 24%; font-size: .94rem; animation-duration: 12s; animation-delay: .4s; }
+.snow-7  { left: 28%; font-size: .76rem; animation-duration: 14s; animation-delay: 2.5s; }
+.snow-8  { left: 32%; font-size: 1.08rem; animation-duration: 11s; animation-delay: 4.2s; }
+.snow-9  { left: 36%; font-size: .74rem; animation-duration: 9.5s; animation-delay: .9s; }
+.snow-10 { left: 41%; font-size: .9rem;  animation-duration: 13s; animation-delay: 3.3s; }
+.snow-11 { left: 45%; font-size: .78rem; animation-duration: 10.5s; animation-delay: 1.7s; }
+.snow-12 { left: 49%; font-size: 1.02rem; animation-duration: 15s; animation-delay: 2.9s; }
+.snow-13 { left: 53%; font-size: .68rem; animation-duration: 11.5s; animation-delay: .5s; }
+.snow-14 { left: 57%; font-size: .88rem; animation-duration: 12.5s; animation-delay: 1.9s; }
+.snow-15 { left: 61%; font-size: .76rem; animation-duration: 14.5s; animation-delay: 3.8s; }
+.snow-16 { left: 65%; font-size: .96rem; animation-duration: 10.5s; animation-delay: 2.3s; }
+.snow-17 { left: 69%; font-size: .8rem;  animation-duration: 16s; animation-delay: 4.5s; }
+.snow-18 { left: 73%; font-size: 1.06rem; animation-duration: 13.5s; animation-delay: 5s; }
+.snow-19 { left: 77%; font-size: .72rem; animation-duration: 15.5s; animation-delay: 2.2s; }
+.snow-20 { left: 81%; font-size: .82rem; animation-duration: 17s; animation-delay: 6s; }
+.snow-21 { left: 85%; font-size: .9rem;  animation-duration: 14s; animation-delay: 4.7s; }
+.snow-22 { left: 89%; font-size: .74rem; animation-duration: 16.5s; animation-delay: 5.1s; }
+.snow-23 { left: 93%; font-size: .78rem; animation-duration: 15s; animation-delay: 6.3s; }
+.snow-24 { left: 97%; font-size: .82rem; animation-duration: 14.5s; animation-delay: 3.4s; }
+.snow-25 { left: 5%;  font-size: 1.18rem; animation-duration: 9.5s; animation-delay: 1.2s; }
+.snow-26 { left: 21%; font-size: 1.25rem; animation-duration: 10.5s; animation-delay: 2.6s; }
+.snow-27 { left: 39%; font-size: 1.12rem; animation-duration: 9.8s; animation-delay: .7s; }
+.snow-28 { left: 55%; font-size: 1.22rem; animation-duration: 11.2s; animation-delay: 3.1s; }
+.snow-29 { left: 71%; font-size: 1.15rem; animation-duration: 10.8s; animation-delay: 2.4s; }
+.snow-30 { left: 87%; font-size: 1.2rem;  animation-duration: 9.6s; animation-delay: 4.6s; }
+.snow-31 { left: 13%; font-size: .62rem; animation-duration: 18s; animation-delay: 5.6s; }
+.snow-32 { left: 47%; font-size: .58rem; animation-duration: 19s; animation-delay: 6.1s; }
+.snow-33 { left: 67%; font-size: .64rem; animation-duration: 18.5s; animation-delay: 4.8s; }
+.snow-34 { left: 91%; font-size: .6rem; animation-duration: 20s; animation-delay: 5.9s; }
+
+.hail-water {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 40%;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.hail-wave {
+  position: absolute;
+  left: -14%;
+  width: 128%;
+  border-radius: 45% 55% 0 0 / 100% 100% 0 0;
+}
+
+.wave-1 {
+  bottom: 28%;
+  height: 95px;
+  background: rgba(120, 208, 255, 0.14);
+  transform: translate(calc(var(--mx) * 5px), calc(var(--my) * 2px));
+  animation: waveMoveSlow 18s ease-in-out infinite;
+}
+
+.wave-2 {
+  bottom: 22%;
+  height: 120px;
+  background: rgba(102, 196, 255, 0.16);
+  transform: translate(calc(var(--mx) * 8px), calc(var(--my) * 2px));
+  animation: waveMove 15s ease-in-out infinite;
+}
+
+.wave-3 {
+  bottom: 14%;
+  height: 150px;
+  background: rgba(66, 170, 235, 0.22);
+  transform: translate(calc(var(--mx) * 12px), calc(var(--my) * 3px));
+  animation: waveMoveReverse 11s ease-in-out infinite;
+}
+
+.wave-4 {
+  bottom: 7%;
+  height: 185px;
+  background: rgba(31, 136, 204, 0.3);
+  transform: translate(calc(var(--mx) * 18px), calc(var(--my) * 4px));
+  animation: waveMove 8.5s ease-in-out infinite;
+}
+
+.wave-5 {
+  bottom: -4%;
+  height: 240px;
+  background: rgba(11, 102, 167, 0.42);
+  transform: translate(calc(var(--mx) * 24px), calc(var(--my) * 5px));
+  animation: waveMoveStrong 6.2s ease-in-out infinite;
+}
+
+.hail-water-shine {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 100%;
+  background:
+    radial-gradient(circle at var(--mouse-x) calc(var(--mouse-y) + 120px), rgba(160, 236, 255, 0.18) 0%, rgba(160, 236, 255, 0.08) 14%, rgba(160, 236, 255, 0) 32%),
+    linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 24%);
+  pointer-events: none;
+}
+
+.hail-dashboard-topbar {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 20px 24px 0;
+}
+
+.hail-user-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: rgba(7, 26, 47, 0.62);
+  border: 1px solid rgba(181, 231, 255, 0.14);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+}
+
+.hail-user-glow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(119, 214, 255, 0.06), rgba(119, 214, 255, 0.16), rgba(119, 214, 255, 0.06));
+  transform: translateX(-100%);
+  animation: chipSweep 6s linear infinite;
+}
+
+.hail-user-text {
+  position: relative;
+  z-index: 1;
+  color: #d8f4ff;
+  font-weight: 700;
+}
+
+.hail-user-text strong {
+  color: #ffffff;
+}
+
+.hail-logout-btn {
+  border: none;
+  border-radius: 18px;
+  padding: 12px 18px;
+  background: linear-gradient(180deg, #2fb989 0%, #0d7a5a 100%);
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(13, 122, 90, 0.24);
+  transition: transform 0.18s ease, filter 0.18s ease, opacity 0.18s ease;
+}
+
+.hail-logout-btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+  filter: brightness(1.04);
+}
+
+.hail-logout-btn:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.hail-dashboard-ui {
+  position: relative;
+  z-index: 5;
+  min-height: calc(100vh - 86px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px 40px;
+}
+
+.hail-main-card {
+  position: relative;
+  width: min(760px, 94vw);
+  padding: 36px 30px 28px;
+  border-radius: 34px;
+  background: linear-gradient(180deg, rgba(7, 26, 47, 0.72) 0%, rgba(8, 33, 58, 0.9) 100%);
+  border: 1px solid rgba(184, 232, 255, 0.16);
+  backdrop-filter: blur(16px);
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  text-align: center;
+  transform:
+    perspective(1200px)
+    rotateX(var(--card-rx))
+    rotateY(var(--card-ry))
+    translate(calc(var(--mx) * 10px), calc(var(--my) * 10px));
+  transition: transform 0.14s ease-out;
+  overflow: hidden;
+}
+
+.hail-card-top-light {
+  position: absolute;
+  left: 50%;
+  top: -140px;
+  width: 380px;
+  height: 320px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(111, 214, 255, 0.18) 0%, rgba(111, 214, 255, 0.06) 38%, rgba(111, 214, 255, 0) 72%);
+  pointer-events: none;
+}
+
+.hail-kicker {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 10px;
+  color: #a8e8ff;
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hail-main-title {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-family: "Fredoka", sans-serif;
+  font-size: clamp(3rem, 7vw, 6rem);
+  line-height: 0.9;
+  color: #f4fbff;
+  text-shadow:
+    0 0 36px rgba(116, 219, 255, 0.16),
+    0 10px 26px rgba(0, 0, 0, 0.28);
+  animation: titleFloat 4s ease-in-out infinite;
+}
+
+.hail-main-subtitle {
+  position: relative;
+  z-index: 1;
+  margin: 18px auto 0;
+  max-width: 560px;
+  color: #d7f2ff;
+  font-size: 1.08rem;
+  line-height: 1.72;
+}
+
+.hail-quote-box {
+  position: relative;
+  z-index: 1;
+  margin: 24px auto 0;
+  max-width: 520px;
+  padding: 16px 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(185, 232, 255, 0.12);
+}
+
+.hail-quote-label {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: #9fe3ff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hail-quote-box p {
+  margin: 0;
+  color: #eefbff;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.hail-start-btn {
+  position: relative;
+  z-index: 1;
+  margin-top: 26px;
+  width: min(360px, 100%);
+  border: none;
+  border-radius: 20px;
+  padding: 16px 20px;
+  background: linear-gradient(180deg, #31b2ff 0%, #135fc3 100%);
+  color: #fff;
+  font-size: 1.08rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: 0 14px 28px rgba(19, 95, 195, 0.28);
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.hail-start-btn:hover {
+  transform: translateY(-3px) scale(1.025);
+  filter: brightness(1.05);
+}
+
+.hail-start-btn:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+.hail-menu-grid {
+  position: relative;
+  z-index: 1;
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.hail-menu-btn {
+  border: 1px solid rgba(183, 231, 255, 0.12);
+  border-radius: 18px;
+  padding: 15px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f2fbff;
+  font-size: 0.98rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.hail-menu-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  filter: brightness(1.04);
+}
+
+@keyframes moonPulse {
+  0% { transform: scale(0.96); opacity: 0.72; }
+  50% { transform: scale(1.03); opacity: 1; }
+  100% { transform: scale(0.96); opacity: 0.72; }
+}
+
+@keyframes rotateRays {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.4); }
+}
+
+@keyframes auroraShift {
+  0%, 100% { transform: translateX(0) skewX(-10deg); opacity: 0.18; }
+  50% { transform: translateX(30px) skewX(-15deg); opacity: 0.32; }
+}
+
+@keyframes fogDrift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(7%); }
+}
+
+@keyframes glacierBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes icebergFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(1deg); }
+}
+
+@keyframes shardFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.55; }
+  50% { transform: translateY(-14px) rotate(6deg); opacity: 0.9; }
+}
+
+@keyframes snowfall {
+  0% {
+    transform: translateY(-10vh) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.92;
+  }
+  50% {
+    transform: translateY(50vh) translateX(calc(16px + (var(--mx) * -24px))) rotate(120deg);
+  }
+  100% {
+    transform: translateY(110vh) translateX(calc(-18px + (var(--mx) * -42px))) rotate(240deg);
+    opacity: 0.15;
+  }
+}
+
+@keyframes waveMoveSlow {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(2%) translateY(6px); }
+}
+
+@keyframes waveMove {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(3%) translateY(8px); }
+}
+
+@keyframes waveMoveReverse {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(-3%) translateY(10px); }
+}
+
+@keyframes waveMoveStrong {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(4%) translateY(12px); }
+}
+
+@keyframes titleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes chipSweep {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+@media (max-width: 900px) {
+  .hail-dashboard-topbar {
+    padding: 16px 14px 0;
+  }
+
+  .hail-dashboard-ui {
+    padding: 8px 14px 28px;
+  }
+
+  .hail-main-card {
+    padding: 28px 20px 22px;
+    transform: none;
+  }
+
+  .hail-menu-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hail-moon {
+    width: 95px;
+    height: 95px;
+    top: 56px;
+  }
+
+  .hail-moon-glow {
+    width: 170px;
+    height: 170px;
+  }
+
+  .hail-moon-rays {
+    width: 250px;
+    height: 250px;
+  }
+
+  .glacier-mid {
+    bottom: 18%;
+  }
+
+  .hail-icebergs-layer {
+    bottom: 13%;
+  }
+}
+
+@media (max-width: 640px) {
+  .hail-dashboard-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hail-user-chip,
+  .hail-logout-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hail-main-title {
+    font-size: 2.9rem;
+  }
+
+  .hail-main-subtitle {
+    font-size: 0.98rem;
+  }
+
+  .hail-quote-box {
+    padding: 14px;
+  }
+
+  .wave-5 {
+    height: 190px;
+  }
+
+  .wave-4 {
+    height: 155px;
+  }
+
+  .wave-3 {
+    height: 130px;
+  }
+
+  .glacier-far {
+    bottom: 32%;
+  }
+
+  .glacier-back {
+    bottom: 26%;
+  }
+
+  .glacier-mid {
+    bottom: 20%;
+  }
+
+  .hail-icebergs-layer {
+    bottom: 15%;
+  }
+}
