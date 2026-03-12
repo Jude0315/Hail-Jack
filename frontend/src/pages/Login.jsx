@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import "../styles/login.css";
@@ -9,8 +9,36 @@ function Login() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let mounted = true;
+
+    const checkExistingSession = async () => {
+      try {
+        await axios.get("http://localhost:3001/me", {
+          withCredentials: true,
+        });
+
+        if (!mounted) return;
+        navigate("/dashboard", { replace: true });
+      } catch (err) {
+        if (!mounted) return;
+      } finally {
+        if (mounted) {
+          setCheckingSession(false);
+        }
+      }
+    };
+
+    checkExistingSession();
+
+    return () => {
+      mounted = false;
+    };
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,7 +53,7 @@ function Login() {
       );
 
       if (result.data?.message === "Success") {
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
         return;
       }
 
@@ -41,6 +69,27 @@ function Login() {
       setLoading(false);
     }
   };
+
+  if (checkingSession) {
+    return (
+      <div className="hail-login-page">
+        <div className="hail-login-overlay" />
+        <div className="hail-stars layer" />
+        <div className="hail-moon layer" />
+        <div className="hail-moon-glow layer" />
+
+        <div className="hail-login-content">
+          <div className="hail-login-card">
+            <div className="hail-card-top">
+              <span className="hail-badge">Ocean Login</span>
+              <h2>Checking Session</h2>
+              <p>Please wait while we verify your crew pass.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="hail-login-page">

@@ -16,7 +16,7 @@ export default function Game() {
   const [questions, setQuestions] = useState([]);
   const [idx, setIdx] = useState(0);
 
-  const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
   const [locked, setLocked] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
@@ -41,6 +41,10 @@ export default function Game() {
     );
   };
 
+  const handleUnauthorized = () => {
+    navigate("/login", { replace: true });
+  };
+
   const handleLogout = async () => {
     try {
       setLoggingOut(true);
@@ -50,13 +54,11 @@ export default function Game() {
         {},
         { withCredentials: true }
       );
-
-      navigate("/login");
     } catch (err) {
-      console.error("Logout failed:", err?.response || err);
-      alert("Logout failed. Please try again.");
+      console.warn("Logout failed, continuing anyway.", err?.response || err);
     } finally {
       setLoggingOut(false);
+      navigate("/login", { replace: true });
     }
   };
 
@@ -65,32 +67,45 @@ export default function Game() {
     isLoadingRef.current = true;
 
     try {
-      setLoading(true);
+      setPageLoading(true);
       setLoadError("");
 
-      const url = `http://localhost:3001/game/questions?amount=5&t=${Date.now()}`;
-      const res = await fetch(url);
+      const authRes = await axios.get("http://localhost:3001/me", {
+        withCredentials: true,
+      });
 
-      if (!res.ok) {
-        const txt = await res.text().catch(() => "");
-        throw new Error(`Backend ${res.status}: ${txt || "No details"}`);
+      if (!authRes.data?.user?.id) {
+        handleUnauthorized();
+        return;
       }
 
-      const data = await res.json();
+      const res = await axios.get("http://localhost:3001/game/questions?amount=5", {
+        withCredentials: true,
+      });
 
-      if (!Array.isArray(data.questions) || data.questions.length === 0) {
+      if (!Array.isArray(res.data?.questions) || res.data.questions.length === 0) {
         throw new Error("Backend returned no questions");
       }
 
-      setQuestions(data.questions);
+      setQuestions(res.data.questions);
       setIdx(0);
     } catch (err) {
-      console.error("Failed to load questions:", err);
+      console.error("Failed to load questions:", err?.response || err);
+
+      if (err?.response?.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
       setQuestions([]);
       setIdx(0);
-      setLoadError(err.message);
+      setLoadError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to load questions."
+      );
     } finally {
-      setLoading(false);
+      setPageLoading(false);
       isLoadingRef.current = false;
     }
   };
@@ -167,6 +182,10 @@ export default function Game() {
         setResultSaved(true);
       } catch (err) {
         console.error("Failed to save game result:", err?.response || err);
+
+        if (err?.response?.status === 401) {
+          handleUnauthorized();
+        }
       }
     };
 
@@ -190,8 +209,7 @@ export default function Game() {
   };
 
   const submitAnswer = (choice) => {
-    if (status !== "playing") return;
-    if (locked) return;
+    if (status !== "playing" || locked) return;
 
     const current = questions[idx];
     if (!current) return;
@@ -285,7 +303,7 @@ export default function Game() {
     return 0.65;
   };
 
-  if (loading) {
+  if (pageLoading) {
     return (
       <div className="scene">
         <video className="bgVideo" autoPlay loop muted playsInline>

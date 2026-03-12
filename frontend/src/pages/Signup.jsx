@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/Signup.css";
@@ -12,8 +12,36 @@ function Signup() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let mounted = true;
+
+    const checkExistingSession = async () => {
+      try {
+        await axios.get("http://localhost:3001/me", {
+          withCredentials: true,
+        });
+
+        if (!mounted) return;
+        navigate("/dashboard", { replace: true });
+      } catch (err) {
+        if (!mounted) return;
+      } finally {
+        if (mounted) {
+          setCheckingSession(false);
+        }
+      }
+    };
+
+    checkExistingSession();
+
+    return () => {
+      mounted = false;
+    };
+  }, [navigate]);
 
   const validatePassword = (pwd) => {
     const regex =
@@ -59,12 +87,12 @@ function Signup() {
 
       if (result.data?.message === "Registration successful") {
         setSuccess("Registration successful. Redirecting to login...");
-        setTimeout(() => navigate("/login"), 1200);
+        setTimeout(() => navigate("/login", { replace: true }), 1200);
         return;
       }
 
       setSuccess("Registration complete. Redirecting to login...");
-      setTimeout(() => navigate("/login"), 1200);
+      setTimeout(() => navigate("/login", { replace: true }), 1200);
     } catch (err) {
       const msg =
         err?.response?.data?.message ||
@@ -81,6 +109,27 @@ function Signup() {
     confirmPassword.length > 0 && password === confirmPassword;
 
   const passwordStrong = validatePassword(password);
+
+  if (checkingSession) {
+    return (
+      <div className="hail-signup-page">
+        <div className="hail-signup-overlay" />
+        <div className="hail-stars layer" />
+        <div className="hail-moon layer" />
+        <div className="hail-moon-glow layer" />
+
+        <div className="hail-signup-content">
+          <div className="hail-signup-card">
+            <div className="hail-card-top">
+              <span className="hail-badge">Crew Registration</span>
+              <h2>Checking Session</h2>
+              <p>Please wait while we verify your crew pass.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="hail-signup-page">

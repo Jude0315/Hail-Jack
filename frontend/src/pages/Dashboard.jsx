@@ -8,6 +8,7 @@ export default function Dashboard() {
   const sceneRef = useRef(null);
 
   const [playerName, setPlayerName] = useState("Crew Member");
+  const [pageLoading, setPageLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
@@ -15,6 +16,8 @@ export default function Dashboard() {
 
     const loadUser = async () => {
       try {
+        setPageLoading(true);
+
         const res = await axios.get("http://localhost:3001/me", {
           withCredentials: true,
         });
@@ -31,6 +34,14 @@ export default function Dashboard() {
         setPlayerName(name);
       } catch (err) {
         console.warn("Could not load current user:", err?.response || err);
+
+        if (!mounted) return;
+        navigate("/login", { replace: true });
+        return;
+      } finally {
+        if (mounted) {
+          setPageLoading(false);
+        }
       }
     };
 
@@ -39,11 +50,11 @@ export default function Dashboard() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     const scene = sceneRef.current;
-    if (!scene) return;
+    if (!scene || pageLoading) return;
 
     let rafId = null;
 
@@ -85,11 +96,12 @@ export default function Dashboard() {
       scene.removeEventListener("mouseleave", handleLeave);
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [pageLoading]);
 
   const handleLogout = async () => {
     try {
       setLoggingOut(true);
+
       await axios.post(
         "http://localhost:3001/logout",
         {},
@@ -99,13 +111,30 @@ export default function Dashboard() {
       console.warn("Logout failed, continuing anyway.", err?.response || err);
     } finally {
       setLoggingOut(false);
-      navigate("/login");
+      navigate("/login", { replace: true });
     }
   };
 
   const snowflakes = Array.from({ length: 34 }, (_, i) => i + 1);
   const stars = Array.from({ length: 18 }, (_, i) => i + 1);
   const shards = Array.from({ length: 12 }, (_, i) => i + 1);
+
+  if (pageLoading) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "grid",
+          placeItems: "center",
+          background: "linear-gradient(180deg, #08111f 0%, #0d1f33 100%)",
+          color: "white",
+          fontSize: "1.2rem",
+        }}
+      >
+        Loading dashboard...
+      </div>
+    );
+  }
 
   return (
     <div className="hail-dashboard" ref={sceneRef}>
@@ -230,10 +259,7 @@ export default function Dashboard() {
               🏆 Leaderboard
             </button>
 
-            <button
-              className="hail-menu-btn"
-              onClick={() => navigate("/how")}
-            >
+            <button className="hail-menu-btn" onClick={() => navigate("/how")}>
               📜 How to Play
             </button>
           </div>

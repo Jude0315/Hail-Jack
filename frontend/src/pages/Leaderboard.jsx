@@ -17,10 +17,32 @@ export default function Leaderboard() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const [search, setSearch] = useState("");
   const [showAllPlayers, setShowAllPlayers] = useState(false);
   const [showAllSessions, setShowAllSessions] = useState(false);
+
+  const handleUnauthorized = () => {
+    navigate("/login", { replace: true });
+  };
+
+  const handleLogout = async () => {
+    try {
+      setLoggingOut(true);
+
+      await axios.post(
+        "http://localhost:3001/logout",
+        {},
+        { withCredentials: true }
+      );
+    } catch (err) {
+      console.warn("Logout failed, continuing anyway.", err?.response || err);
+    } finally {
+      setLoggingOut(false);
+      navigate("/login", { replace: true });
+    }
+  };
 
   useEffect(() => {
     const loadLeaderboard = async () => {
@@ -52,14 +74,22 @@ export default function Leaderboard() {
         );
       } catch (err) {
         console.error("Leaderboard load error:", err?.response || err);
-        setError("Failed to load leaderboard.");
+
+        if (err?.response?.status === 401) {
+          handleUnauthorized();
+          return;
+        }
+
+        setError(
+          err?.response?.data?.message || "Failed to load leaderboard."
+        );
       } finally {
         setLoading(false);
       }
     };
 
     loadLeaderboard();
-  }, []);
+  }, [navigate]);
 
   const filteredPlayers = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -143,12 +173,29 @@ export default function Leaderboard() {
               </p>
             </div>
 
-            <button
-              className="hail-board-back-btn"
-              onClick={() => navigate("/dashboard")}
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
             >
-              ⟵ Back
-            </button>
+              <button
+                className="hail-board-back-btn"
+                onClick={() => navigate("/dashboard")}
+              >
+                ⟵ Back
+              </button>
+
+              <button
+                className="hail-board-back-btn"
+                onClick={handleLogout}
+                disabled={loggingOut}
+              >
+                {loggingOut ? "Logging out..." : "Logout"}
+              </button>
+            </div>
           </div>
 
           {error && (
@@ -160,17 +207,23 @@ export default function Leaderboard() {
           <div className="hail-summary-grid">
             <div className="hail-summary-card icy-blue">
               <span className="hail-summary-label">Total Players</span>
-              <strong className="hail-summary-value">{summary.totalPlayers}</strong>
+              <strong className="hail-summary-value">
+                {summary.totalPlayers}
+              </strong>
             </div>
 
             <div className="hail-summary-card icy-cyan">
               <span className="hail-summary-label">Total Matches</span>
-              <strong className="hail-summary-value">{summary.totalMatches}</strong>
+              <strong className="hail-summary-value">
+                {summary.totalMatches}
+              </strong>
             </div>
 
             <div className="hail-summary-card icy-gold">
               <span className="hail-summary-label">Highest Score Ever</span>
-              <strong className="hail-summary-value">{summary.highestScoreEver}</strong>
+              <strong className="hail-summary-value">
+                {summary.highestScoreEver}
+              </strong>
             </div>
 
             <div className="hail-summary-card icy-violet">
@@ -306,7 +359,10 @@ export default function Leaderboard() {
                     </thead>
                     <tbody>
                       {visibleSessions.map((session, index) => (
-                        <tr key={session._id} className={index < 3 ? "is-top-rank" : ""}>
+                        <tr
+                          key={session._id}
+                          className={index < 3 ? "is-top-rank" : ""}
+                        >
                           <td>
                             <span className={`hail-rank-pill rank-${index + 1}`}>
                               {getRankBadge(index + 1)}

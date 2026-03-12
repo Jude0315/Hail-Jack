@@ -24,7 +24,7 @@ app.use(express.json());
 app.use(
   cors({
     origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "OPTIONS"],
     credentials: true,
   })
 );
@@ -41,7 +41,7 @@ app.use(
     }),
     cookie: {
       httpOnly: true,
-      secure: false, // true only with HTTPS
+      secure: false, // set true only when using HTTPS
       sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24, // 1 day
     },
@@ -61,7 +61,6 @@ mongoose
 // =========================
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Minimum 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special
 const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()[\]{}\-_=+\\|;:'",.<>/?`~]).{8,}$/;
 
@@ -144,7 +143,9 @@ app.post("/login", async (req, res) => {
     const password = req.body.password;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
     }
 
     const user = await PlayerModel.findOne({ email });
@@ -189,7 +190,7 @@ app.post("/logout", (req, res) => {
   });
 });
 
-// Check current logged-in user
+// Current logged-in user
 app.get("/me", (req, res) => {
   if (!req.session || !req.session.userId) {
     return res.status(401).json({ message: "Not logged in" });
@@ -240,6 +241,7 @@ async function fetchOpenTdbWithRetry(url, retries = 3) {
       }
 
       const data = await response.json();
+
       if (!data || !Array.isArray(data.results)) {
         throw new Error("OpenTDB returned invalid format");
       }
@@ -261,10 +263,12 @@ async function fetchOpenTdbWithRetry(url, retries = 3) {
 // =========================
 // Questions Route
 // =========================
-app.get("/game/questions", async (req, res) => {
+app.get("/game/questions", requireAuth, async (req, res) => {
   try {
     const amount = Number(req.query.amount || 5);
-    const url = `https://opentdb.com/api.php?amount=${amount}&type=multiple&difficulty=easy`;
+    const safeAmount = Number.isNaN(amount) ? 5 : Math.min(Math.max(amount, 1), 10);
+
+    const url = `https://opentdb.com/api.php?amount=${safeAmount}&type=multiple&difficulty=easy`;
 
     const data = await fetchOpenTdbWithRetry(url, 3);
 
@@ -285,23 +289,27 @@ app.get("/game/questions", async (req, res) => {
         question: decode(q.question),
         options,
         answer: decode(q.correct_answer),
-        category: q.category,
-        difficulty: q.difficulty,
+        category: decode(q.category),
+        difficulty: decode(q.difficulty),
       };
     });
 
-    res.json({ questions });
+    return res.json({ questions });
   } catch (err) {
     console.error("GAME QUESTIONS FINAL FAIL:", err.message);
-    res.status(502).json({
+    return res.status(502).json({
       message: "Question service unavailable (OpenTDB)",
       error: err.message,
     });
   }
 });
 
-//Leader Board Routes=================================//
-app.post("/leaderboard/save", requireAuth, async (req, res) => {//Save completed game
+// =========================
+// Leaderboard Routes
+// =========================
+
+// Save completed game
+app.post("/leaderboard/save", requireAuth, async (req, res) => {
   try {
     const {
       result,
@@ -340,9 +348,8 @@ app.post("/leaderboard/save", requireAuth, async (req, res) => {//Save completed
   }
 });
 
-//Overall player leaderboard
-
-app.get("/leaderboard/players", async (req, res) => {
+// Overall player leaderboard
+app.get("/leaderboard/players", requireAuth, async (req, res) => {
   try {
     const leaderboard = await GameResultModel.aggregate([
       {
@@ -414,8 +421,8 @@ app.get("/leaderboard/players", async (req, res) => {
   }
 });
 
-//Top match session
-app.get("/leaderboard/sessions", async (req, res) => {
+// Top match sessions
+app.get("/leaderboard/sessions", requireAuth, async (req, res) => {
   try {
     const sessions = await GameResultModel.find({})
       .sort({ score: -1, playedAt: -1 })
@@ -430,8 +437,8 @@ app.get("/leaderboard/sessions", async (req, res) => {
   }
 });
 
-//summary stats
-app.get("/leaderboard/summary", async (req, res) => {
+// Summary stats
+app.get("/leaderboard/summary", requireAuth, async (req, res) => {
   try {
     const totalPlayers = await GameResultModel.distinct("playerId");
     const totalMatches = await GameResultModel.countDocuments();
@@ -465,9 +472,6 @@ app.get("/leaderboard/summary", async (req, res) => {
     });
   }
 });
-
-
-
 
 // =========================
 // Start Server
