@@ -8,6 +8,7 @@ export default function IntroScreen() {
   const audioRef = useRef(null);
   const clickAudioRef = useRef(null);
 
+  // Control the intro sequence and visual states
   const [progress, setProgress] = useState(0);
   const [titleVisible, setTitleVisible] = useState(false);
   const [subtitleVisible, setSubtitleVisible] = useState(false);
@@ -23,6 +24,7 @@ export default function IntroScreen() {
 
     let rafId = null;
 
+    // Update the light and movement effect based on mouse position
     const handleMove = (e) => {
       if (rafId) cancelAnimationFrame(rafId);
 
@@ -41,6 +43,7 @@ export default function IntroScreen() {
       });
     };
 
+    // Reset the effect when the mouse leaves the page
     const handleLeave = () => {
       intro.style.setProperty("--mx", "0");
       intro.style.setProperty("--my", "0");
@@ -61,11 +64,13 @@ export default function IntroScreen() {
   useEffect(() => {
     const timers = [];
 
+    // Show each intro element one after another
     timers.push(setTimeout(() => setTitleVisible(true), 500));
     timers.push(setTimeout(() => setSubtitleVisible(true), 1500));
     timers.push(setTimeout(() => setLoaderVisible(true), 2200));
     timers.push(setTimeout(() => setActionsVisible(true), 3000));
 
+    // Fill the loading bar over time
     const totalDuration = 10000;
     const intervalMs = 50;
     const step = 100 / (totalDuration / intervalMs);
@@ -81,10 +86,12 @@ export default function IntroScreen() {
       });
     }, intervalMs);
 
+    // Start fading out near the end of the intro
     const fadeTimer = setTimeout(() => {
       setFadeOut(true);
     }, 9800);
 
+    // Move to the login page automatically after the intro finishes
     const navTimer = setTimeout(() => {
       navigate("/login", { replace: true });
     }, 10500);
@@ -97,6 +104,7 @@ export default function IntroScreen() {
     };
   }, [navigate]);
 
+  // Skip the intro and go straight to the login page
   const goToLogin = () => {
     if (clickAudioRef.current) {
       clickAudioRef.current.currentTime = 0;
@@ -111,6 +119,7 @@ export default function IntroScreen() {
     }, 700);
   };
 
+  // Turn intro sound on or off
   const toggleMute = async () => {
     const audio = audioRef.current;
     const clickAudio = clickAudioRef.current;
@@ -118,12 +127,14 @@ export default function IntroScreen() {
     if (!audio) return;
 
     try {
+      // Play the button click sound first
       if (clickAudio) {
         clickAudio.currentTime = 0;
         clickAudio.volume = 0.6;
         await clickAudio.play().catch(() => {});
       }
 
+      // If currently muted, unmute and start the background sound
       if (muted) {
         audio.muted = false;
         audio.volume = 0.35;
@@ -135,6 +146,7 @@ export default function IntroScreen() {
 
         setMuted(false);
       } else {
+        // If already playing, mute the sound
         audio.muted = true;
         setMuted(true);
       }
@@ -148,14 +160,17 @@ export default function IntroScreen() {
       className={`hail-intro ${fadeOut ? "intro-fade-out" : ""}`}
       ref={introRef}
     >
+      {/* Background wind audio */}
       <audio ref={audioRef} loop preload="auto" muted>
         <source src="/sounds/icy-wind.mp3" type="audio/mpeg" />
       </audio>
 
+      {/* Button click sound */}
       <audio ref={clickAudioRef} preload="auto">
         <source src="/sounds/ui-click.mp3" type="audio/mpeg" />
       </audio>
 
+      {/* Background visual layers */}
       <div className="intro-vignette" />
       <div className="intro-exit-vignette" />
       <div className="intro-noise" />
@@ -177,6 +192,7 @@ export default function IntroScreen() {
       <div className="intro-fog fog-3" />
       <div className="intro-fog fog-4" />
 
+      {/* Snow effect */}
       <div className="intro-snow">
         {Array.from({ length: 28 }, (_, i) => (
           <span key={i} className={`flake flake-${i + 1}`}>
@@ -185,6 +201,7 @@ export default function IntroScreen() {
         ))}
       </div>
 
+      {/* Ice and water layers */}
       <div className="intro-icefield">
         <div className="iceberg iceberg-1" />
         <div className="iceberg iceberg-2" />
@@ -201,6 +218,7 @@ export default function IntroScreen() {
         <div className="water-ripple" />
       </div>
 
+      {/* Main intro content */}
       <div className="intro-center">
         <p className={`intro-pretitle ${titleVisible ? "show" : ""}`}>
           frozen ocean rescue protocol
@@ -215,6 +233,7 @@ export default function IntroScreen() {
           Survive the storm. Save the sailor.
         </p>
 
+        {/* Loading progress section */}
         <div className={`intro-loader-shell ${loaderVisible ? "show" : ""}`}>
           <div className="intro-loader-label-row">
             <span>Preparing voyage...</span>
@@ -233,12 +252,11 @@ export default function IntroScreen() {
             Loading frozen sea environment...
           </p>
         </div>
-
-        
       </div>
 
+      {/* Sound toggle button */}
       <button className="intro-mute-btn" onClick={toggleMute}>
-        {muted ? "🔇 Muted" : "🔊 Sound On"}
+        {muted ? "Muted" : "Sound On"}
       </button>
     </div>
   );

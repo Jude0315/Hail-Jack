@@ -133,7 +133,6 @@ body {
   animation: cloudDrift 40s linear infinite;
 }
 
-/* Snow */
 .hail-snow {
   position: absolute;
   inset: 0;
@@ -165,7 +164,6 @@ body {
 .snowflake-11 { left: 90%; font-size: 0.85rem; animation-duration: 15s; animation-delay: 3.5s; }
 .snowflake-12 { left: 96%; font-size: 1rem;   animation-duration: 12s; animation-delay: 1s; }
 
-/* Sparkles */
 .hail-sparkles {
   position: absolute;
   inset: 0;
@@ -188,7 +186,6 @@ body {
 .spark-4 { left: 86%; top: 58%; animation-delay: 1.8s; }
 .spark-5 { left: 54%; top: 28%; animation-delay: 2.2s; }
 
-/* Waves */
 .hail-wave {
   position: absolute;
   left: -50%;
@@ -410,7 +407,6 @@ body {
 .hail-login-btn,
 .hail-register-btn {
   width: 100%;
-  border: none;
   border-radius: 18px;
   padding: 14px 18px;
   font-size: 1rem;
@@ -423,6 +419,7 @@ body {
 
 .hail-login-btn {
   margin-top: 8px;
+  border: none;
   color: #ffffff;
   background: linear-gradient(180deg, #31b1ff 0%, #1167c3 100%);
   box-shadow: 0 10px 20px rgba(17, 103, 195, 0.28);
@@ -444,8 +441,9 @@ body {
 
 .hail-register-btn {
   display: inline-block;
-  background: rgba(255, 248, 232, 0.75);
+  appearance: none;
   border: 2px solid #8d5b24;
+  background: rgba(255, 248, 232, 0.75);
   color: #5a340d;
   box-shadow: 0 8px 14px rgba(92, 56, 18, 0.12);
 }
@@ -467,6 +465,31 @@ body {
   padding: 0 12px;
   color: #69411a;
   font-weight: 800;
+}
+
+.hail-sound-btn {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 30;
+  border: 1px solid rgba(182, 233, 255, 0.18);
+  background: rgba(8, 22, 36, 0.58);
+  color: #eaf8ff;
+  backdrop-filter: blur(12px);
+  padding: 0.7rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  transition: transform 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+}
+
+.hail-sound-btn:hover {
+  transform: translateX(-50%) translateY(-2px);
+  background: rgba(12, 31, 49, 0.72);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
 }
 
 @keyframes twinkle {
@@ -641,5 +664,11 @@ body {
 
   .hail-wave-front {
     height: 180px;
+  }
+
+  .hail-sound-btn {
+    bottom: 18px;
+    font-size: 0.86rem;
+    padding: 0.65rem 1rem;
   }
 }

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/login.css";
 
@@ -10,6 +10,15 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
+
+  const [muted, setMuted] = useState(true);
+  const [audioStarted, setAudioStarted] = useState(false);
+
+  const audioRef = useRef(null);
+  const clickAudioRef = useRef(null);
+  const startAudioRef = useRef(null);
+  const registerAudioRef = useRef(null);
+  const errorAudioRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -40,10 +49,74 @@ function Login() {
     };
   }, [navigate]);
 
+  const playAudio = (audioEl, volume = 0.7) => {
+    if (!audioEl) return;
+    audioEl.currentTime = 0;
+    audioEl.volume = volume;
+    audioEl.play().catch(() => {});
+  };
+
+  const playMuteClickSound = () => {
+    playAudio(clickAudioRef.current, 0.6);
+  };
+
+  const playStartSound = () => {
+    playAudio(startAudioRef.current, 0.75);
+  };
+
+  const playRegisterSound = () => {
+    playAudio(registerAudioRef.current, 0.75);
+  };
+
+  const playErrorSound = () => {
+    playAudio(errorAudioRef.current, 0.8);
+  };
+
+  const toggleMute = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    try {
+      playMuteClickSound();
+
+      if (muted) {
+        audio.muted = false;
+        audio.volume = 0.3;
+
+        if (!audioStarted) {
+          await audio.play();
+          setAudioStarted(true);
+        }
+
+        setMuted(false);
+      } else {
+        audio.muted = true;
+        setMuted(true);
+      }
+    } catch (err) {
+      console.warn("Login audio could not start:", err);
+    }
+  };
+
+  const goToRegister = () => {
+    playRegisterSound();
+    setTimeout(() => {
+      navigate("/register");
+    }, 250);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (!email.trim() || !password.trim()) {
+      setError("Please enter both email and password.");
+      playErrorSound();
+      return;
+    }
+
     setLoading(true);
+    playStartSound();
 
     try {
       const result = await axios.post(
@@ -58,12 +131,14 @@ function Login() {
       }
 
       setError(result.data?.message || "Login failed. Try again.");
+      playErrorSound();
     } catch (err) {
       const msg =
         err?.response?.data?.message ||
         err?.message ||
         "Login failed. Server error.";
       setError(msg);
+      playErrorSound();
       console.error("Login error:", err?.response || err);
     } finally {
       setLoading(false);
@@ -73,6 +148,26 @@ function Login() {
   if (checkingSession) {
     return (
       <div className="hail-login-page">
+        <audio ref={audioRef} loop preload="auto" muted>
+          <source src="/sounds/icy-wind.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={clickAudioRef} preload="auto">
+          <source src="/sounds/ui-click.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={startAudioRef} preload="auto">
+          <source src="/sounds/start-voyage.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={registerAudioRef} preload="auto">
+          <source src="/sounds/open-register.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={errorAudioRef} preload="auto">
+          <source src="/sounds/error-buzz.mp3" type="audio/mpeg" />
+        </audio>
+
         <div className="hail-login-overlay" />
         <div className="hail-stars layer" />
         <div className="hail-moon layer" />
@@ -87,12 +182,36 @@ function Login() {
             </div>
           </div>
         </div>
+
+        <button className="hail-sound-btn" onClick={toggleMute}>
+          {muted ? "🔇 Muted" : "🔊 Sound On"}
+        </button>
       </div>
     );
   }
 
   return (
     <div className="hail-login-page">
+      <audio ref={audioRef} loop preload="auto" muted>
+        <source src="/sounds/icy-wind.mp3" type="audio/mpeg" />
+      </audio>
+
+      <audio ref={clickAudioRef} preload="auto">
+        <source src="/sounds/ui-click.mp3" type="audio/mpeg" />
+      </audio>
+
+      <audio ref={startAudioRef} preload="auto">
+        <source src="/sounds/start-voyage.mp3" type="audio/mpeg" />
+      </audio>
+
+      <audio ref={registerAudioRef} preload="auto">
+        <source src="/sounds/open-register.mp3" type="audio/mpeg" />
+      </audio>
+
+      <audio ref={errorAudioRef} preload="auto">
+        <source src="/sounds/error-buzz.mp3" type="audio/mpeg" />
+      </audio>
+
       <div className="hail-login-overlay" />
 
       <div className="hail-stars layer" />
@@ -157,14 +276,13 @@ function Login() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="hail-form">
+          <form onSubmit={handleSubmit} className="hail-form" noValidate>
             <div className="hail-form-group">
               <label htmlFor="email">Email</label>
               <input
                 id="email"
                 type="email"
                 placeholder="Enter your email"
-                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="hail-input"
@@ -177,7 +295,6 @@ function Login() {
                 id="password"
                 type="password"
                 placeholder="Enter your password"
-                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="hail-input"
@@ -197,11 +314,19 @@ function Login() {
             <span>New to the ship?</span>
           </div>
 
-          <Link to="/register" className="hail-register-btn">
+          <button
+            type="button"
+            className="hail-register-btn"
+            onClick={goToRegister}
+          >
             Create Account
-          </Link>
+          </button>
         </div>
       </div>
+
+      <button className="hail-sound-btn" onClick={toggleMute}>
+        {muted ? "🔇 Muted" : "🔊 Sound On"}
+      </button>
     </div>
   );
 }

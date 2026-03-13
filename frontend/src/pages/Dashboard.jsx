@@ -7,13 +7,19 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const sceneRef = useRef(null);
 
+  // Store the logged-in player's name
   const [playerName, setPlayerName] = useState("Crew Member");
+
+  // Control the first loading state while user data is being fetched
   const [pageLoading, setPageLoading] = useState(true);
+
+  // Used to disable the logout button while the request is running
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     let mounted = true;
 
+    // Load the current user from the backend
     const loadUser = async () => {
       try {
         setPageLoading(true);
@@ -22,8 +28,10 @@ export default function Dashboard() {
           withCredentials: true,
         });
 
+        // Stop if the component has already unmounted
         if (!mounted) return;
 
+        // Try a few possible response shapes before using the default name
         const name =
           res.data?.name ||
           res.data?.playerName ||
@@ -35,10 +43,12 @@ export default function Dashboard() {
       } catch (err) {
         console.warn("Could not load current user:", err?.response || err);
 
+        // If the user is not logged in, send them back to login
         if (!mounted) return;
         navigate("/login", { replace: true });
         return;
       } finally {
+        // End the loading state once the request is done
         if (mounted) {
           setPageLoading(false);
         }
@@ -47,6 +57,7 @@ export default function Dashboard() {
 
     loadUser();
 
+    // Cleanup to avoid setting state after unmount
     return () => {
       mounted = false;
     };
@@ -58,6 +69,8 @@ export default function Dashboard() {
 
     let rafId = null;
 
+    // Update CSS variables based on cursor position
+    // These values are used for background movement and card tilt effects
     const updateVars = (clientX, clientY) => {
       const rect = scene.getBoundingClientRect();
       const x = (clientX - rect.left) / rect.width;
@@ -74,11 +87,13 @@ export default function Dashboard() {
       scene.style.setProperty("--card-ry", `${px * 9}deg`);
     };
 
+    // Use requestAnimationFrame to keep mouse movement smoother
     const handleMove = (e) => {
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => updateVars(e.clientX, e.clientY));
     };
 
+    // Reset the effect when the mouse leaves the dashboard area
     const handleLeave = () => {
       scene.style.setProperty("--mx", "0");
       scene.style.setProperty("--my", "0");
@@ -91,6 +106,7 @@ export default function Dashboard() {
     scene.addEventListener("mousemove", handleMove);
     scene.addEventListener("mouseleave", handleLeave);
 
+    // Remove listeners when the component unmounts
     return () => {
       scene.removeEventListener("mousemove", handleMove);
       scene.removeEventListener("mouseleave", handleLeave);
@@ -98,6 +114,7 @@ export default function Dashboard() {
     };
   }, [pageLoading]);
 
+  // Log the user out, then send them back to the login page
   const handleLogout = async () => {
     try {
       setLoggingOut(true);
@@ -115,10 +132,12 @@ export default function Dashboard() {
     }
   };
 
+  // Create repeated visual elements for the animated background
   const snowflakes = Array.from({ length: 34 }, (_, i) => i + 1);
   const stars = Array.from({ length: 18 }, (_, i) => i + 1);
   const shards = Array.from({ length: 12 }, (_, i) => i + 1);
 
+  // Show a simple loading screen while user data is loading
   if (pageLoading) {
     return (
       <div
@@ -138,11 +157,13 @@ export default function Dashboard() {
 
   return (
     <div className="hail-dashboard" ref={sceneRef}>
+      {/* Main sky and lighting effects */}
       <div className="hail-sky-gradient" />
       <div className="hail-moon-glow" />
       <div className="hail-moon-rays" />
       <div className="hail-moon" />
 
+      {/* Star layers for depth */}
       <div className="hail-star-layer hail-star-layer-a">
         {stars.map((n) => (
           <span key={`a-${n}`} className={`hail-star star-a-${n}`} />
@@ -155,14 +176,17 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {/* Aurora effect */}
       <div className="hail-aurora aurora-1" />
       <div className="hail-aurora aurora-2" />
 
+      {/* Fog layers to make the scene feel colder and deeper */}
       <div className="hail-fog fog-1" />
       <div className="hail-fog fog-2" />
       <div className="hail-fog fog-3" />
       <div className="hail-fog fog-4" />
 
+      {/* Glacier layers in the distance */}
       <div className="hail-glacier-range glacier-far">
         <div className="glacier gf1" />
         <div className="glacier gf2" />
@@ -184,6 +208,7 @@ export default function Dashboard() {
         <div className="glacier gm3" />
       </div>
 
+      {/* Icebergs and floating ice pieces */}
       <div className="hail-icebergs-layer">
         <div className="hail-iceberg ib1" />
         <div className="hail-iceberg ib2" />
@@ -197,8 +222,10 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {/* Cursor light/ripple effect */}
       <div className="hail-cursor-ripple" />
 
+      {/* Snow effect */}
       <div className="hail-snow-layer">
         {snowflakes.map((n) => (
           <span key={n} className={`hail-snowflake snow-${n}`}>
@@ -207,6 +234,7 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {/* Water and wave animation */}
       <div className="hail-water">
         <div className="hail-wave wave-1" />
         <div className="hail-wave wave-2" />
@@ -216,6 +244,7 @@ export default function Dashboard() {
         <div className="hail-water-shine" />
       </div>
 
+      {/* Top bar with player name and logout button */}
       <div className="hail-dashboard-topbar">
         <div className="hail-user-chip">
           <span className="hail-user-glow" />
@@ -233,6 +262,7 @@ export default function Dashboard() {
         </button>
       </div>
 
+      {/* Main dashboard card */}
       <div className="hail-dashboard-ui">
         <div className="hail-main-card">
           <div className="hail-card-top-light" />
@@ -242,25 +272,28 @@ export default function Dashboard() {
             Tug-of-War Quiz • Survive the sea • Beat the rival
           </p>
 
+          {/* Short theme-based message inside the card */}
           <div className="hail-quote-box">
             <span className="hail-quote-label">Jack says</span>
             <p>“The sea is cold... your answers are my only hope.”</p>
           </div>
 
+          {/* Main start button */}
           <button className="hail-start-btn" onClick={() => navigate("/game")}>
             Start Rescue
           </button>
 
+          {/* Extra navigation buttons */}
           <div className="hail-menu-grid">
             <button
               className="hail-menu-btn"
               onClick={() => navigate("/leaderboard")}
             >
-              🏆 Leaderboard
+              Leaderboard
             </button>
 
             <button className="hail-menu-btn" onClick={() => navigate("/how")}>
-              📜 How to Play
+              How to Play
             </button>
           </div>
         </div>

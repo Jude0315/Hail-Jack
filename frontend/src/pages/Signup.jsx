@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/Signup.css";
 
@@ -13,6 +13,15 @@ function Signup() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
+
+  const [muted, setMuted] = useState(true);
+  const [audioStarted, setAudioStarted] = useState(false);
+
+  const audioRef = useRef(null);
+  const clickAudioRef = useRef(null);
+  const signupAudioRef = useRef(null);
+  const backAudioRef = useRef(null);
+  const errorAudioRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -43,6 +52,68 @@ function Signup() {
     };
   }, [navigate]);
 
+  const playAudio = async (audioEl, volume = 0.7) => {
+    if (!audioEl) return;
+
+    try {
+      audioEl.pause();
+      audioEl.currentTime = 0;
+      audioEl.volume = volume;
+      await audioEl.play();
+    } catch {
+      // ignore playback failures
+    }
+  };
+
+  const playMuteClickSound = async () => {
+    await playAudio(clickAudioRef.current, 0.6);
+  };
+
+  const playSignupSound = async () => {
+    await playAudio(signupAudioRef.current, 0.8);
+  };
+
+  const playBackSound = async () => {
+    await playAudio(backAudioRef.current, 0.8);
+  };
+
+  const playErrorSound = async () => {
+    await playAudio(errorAudioRef.current, 0.8);
+  };
+
+  const toggleMute = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    try {
+      await playMuteClickSound();
+
+      if (muted) {
+        audio.muted = false;
+        audio.volume = 0.3;
+
+        if (!audioStarted) {
+          await audio.play();
+          setAudioStarted(true);
+        }
+
+        setMuted(false);
+      } else {
+        audio.muted = true;
+        setMuted(true);
+      }
+    } catch (err) {
+      console.warn("Signup audio could not start:", err);
+    }
+  };
+
+  const goToLogin = async () => {
+    await playBackSound();
+    setTimeout(() => {
+      navigate("/login");
+    }, 450);
+  };
+
   const validatePassword = (pwd) => {
     const regex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()[\]{}\-_=+\\|;:'",.<>/?`~]).{8,}$/;
@@ -56,11 +127,31 @@ function Signup() {
 
     if (!name.trim()) {
       setError("Name is required");
+      await playErrorSound();
+      return;
+    }
+
+    if (!email.trim()) {
+      setError("Email is required");
+      await playErrorSound();
+      return;
+    }
+
+    if (!password.trim()) {
+      setError("Password is required");
+      await playErrorSound();
+      return;
+    }
+
+    if (!confirmPassword.trim()) {
+      setError("Please confirm your password");
+      await playErrorSound();
       return;
     }
 
     if (name.trim().length < 2) {
       setError("Name must be at least 2 characters");
+      await playErrorSound();
       return;
     }
 
@@ -68,11 +159,13 @@ function Signup() {
       setError(
         "Password must be at least 8 characters and include uppercase, lowercase, number, and special character"
       );
+      await playErrorSound();
       return;
     }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
+      await playErrorSound();
       return;
     }
 
@@ -87,18 +180,21 @@ function Signup() {
 
       if (result.data?.message === "Registration successful") {
         setSuccess("Registration successful. Redirecting to login...");
-        setTimeout(() => navigate("/login", { replace: true }), 1200);
+        await playSignupSound();
+        setTimeout(() => navigate("/login", { replace: true }), 650);
         return;
       }
 
       setSuccess("Registration complete. Redirecting to login...");
-      setTimeout(() => navigate("/login", { replace: true }), 1200);
+      await playSignupSound();
+      setTimeout(() => navigate("/login", { replace: true }), 650);
     } catch (err) {
       const msg =
         err?.response?.data?.message ||
         err?.message ||
         "Registration failed.";
       setError(msg);
+      await playErrorSound();
       console.error("Signup error:", err?.response || err);
     } finally {
       setLoading(false);
@@ -113,6 +209,26 @@ function Signup() {
   if (checkingSession) {
     return (
       <div className="hail-signup-page">
+        <audio ref={audioRef} loop preload="auto" muted>
+          <source src="/sounds/icy-wind.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={clickAudioRef} preload="auto">
+          <source src="/sounds/ui-click.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={signupAudioRef} preload="auto">
+          <source src="/sounds/open-register.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={backAudioRef} preload="auto">
+          <source src="/sounds/start-voyage.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={errorAudioRef} preload="auto">
+          <source src="/sounds/error-buzz.mp3" type="audio/mpeg" />
+        </audio>
+
         <div className="hail-signup-overlay" />
         <div className="hail-stars layer" />
         <div className="hail-moon layer" />
@@ -127,12 +243,36 @@ function Signup() {
             </div>
           </div>
         </div>
+
+        <button className="hail-sound-btn" onClick={toggleMute}>
+          {muted ? "🔇 Muted" : "🔊 Sound On"}
+        </button>
       </div>
     );
   }
 
   return (
     <div className="hail-signup-page">
+      <audio ref={audioRef} loop preload="auto" muted>
+        <source src="/sounds/icy-wind.mp3" type="audio/mpeg" />
+      </audio>
+
+      <audio ref={clickAudioRef} preload="auto">
+        <source src="/sounds/ui-click.mp3" type="audio/mpeg" />
+      </audio>
+
+      <audio ref={signupAudioRef} preload="auto">
+        <source src="/sounds/join-voyage.mp3" type="audio/mpeg" />
+      </audio>
+
+      <audio ref={backAudioRef} preload="auto">
+        <source src="/sounds/back-login.mp3" type="audio/mpeg" />
+      </audio>
+
+      <audio ref={errorAudioRef} preload="auto">
+        <source src="/sounds/error-buzz.mp3" type="audio/mpeg" />
+      </audio>
+
       <div className="hail-signup-overlay" />
 
       <div className="hail-stars layer" />
@@ -204,7 +344,7 @@ function Signup() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="hail-form">
+          <form onSubmit={handleSubmit} className="hail-form" noValidate>
             <div className="hail-form-group">
               <label htmlFor="name">Name</label>
               <input
@@ -212,7 +352,6 @@ function Signup() {
                 type="text"
                 placeholder="Enter your name"
                 className="hail-input"
-                required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -225,7 +364,6 @@ function Signup() {
                 type="email"
                 placeholder="Enter your email"
                 className="hail-input"
-                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -238,7 +376,6 @@ function Signup() {
                 type="password"
                 placeholder="Create a password"
                 className="hail-input"
-                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -263,7 +400,6 @@ function Signup() {
                 type="password"
                 placeholder="Retype your password"
                 className="hail-input"
-                required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
@@ -293,11 +429,19 @@ function Signup() {
             <span>Already part of the crew?</span>
           </div>
 
-          <Link to="/login" className="hail-login-btn-secondary">
+          <button
+            type="button"
+            className="hail-login-btn-secondary"
+            onClick={goToLogin}
+          >
             Back to Login
-          </Link>
+          </button>
         </div>
       </div>
+
+      <button className="hail-sound-btn" onClick={toggleMute}>
+        {muted ? "🔇 Muted" : "🔊 Sound On"}
+      </button>
     </div>
   );
 }

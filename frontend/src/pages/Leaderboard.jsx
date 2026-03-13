@@ -6,6 +6,7 @@ import "../styles/leaderboard.css";
 export default function Leaderboard() {
   const navigate = useNavigate();
 
+  // Store leaderboard data from the backend
   const [players, setPlayers] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [summary, setSummary] = useState({
@@ -15,18 +16,22 @@ export default function Leaderboard() {
     topPlayer: "-",
   });
 
+  // General page states
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
 
+  // Search and table display controls
   const [search, setSearch] = useState("");
   const [showAllPlayers, setShowAllPlayers] = useState(false);
   const [showAllSessions, setShowAllSessions] = useState(false);
 
+  // If the user is not authenticated, return them to login
   const handleUnauthorized = () => {
     navigate("/login", { replace: true });
   };
 
+  // Log out the user and go back to login
   const handleLogout = async () => {
     try {
       setLoggingOut(true);
@@ -45,6 +50,7 @@ export default function Leaderboard() {
   };
 
   useEffect(() => {
+    // Load all leaderboard sections together
     const loadLeaderboard = async () => {
       try {
         setLoading(true);
@@ -91,6 +97,7 @@ export default function Leaderboard() {
     loadLeaderboard();
   }, [navigate]);
 
+  // Filter players based on the search text
   const filteredPlayers = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return players;
@@ -102,26 +109,31 @@ export default function Leaderboard() {
     );
   }, [players, search]);
 
+  // Show either all players or just the top 10
   const visiblePlayers = showAllPlayers
     ? filteredPlayers
     : filteredPlayers.slice(0, 10);
 
+  // Show either all match sessions or just the top 10
   const visibleSessions = showAllSessions
     ? sessions
     : sessions.slice(0, 10);
 
+  // Format date values for display in the table
   const formatDate = (date) => {
     if (!date) return "-";
     return new Date(date).toLocaleString();
   };
 
+  // Return a badge for the player rank
   const getRankBadge = (rank) => {
-    if (rank === 1) return "👑";
-    if (rank === 2) return "🥈";
-    if (rank === 3) return "🥉";
+    if (rank === 1) return "1";
+    if (rank === 2) return "2";
+    if (rank === 3) return "3";
     return `#${rank}`;
   };
 
+  // Loading screen while leaderboard data is being fetched
   if (loading) {
     return (
       <div className="hail-board-page">
@@ -153,6 +165,7 @@ export default function Leaderboard() {
         <source src="/videos/dashboard.mp4" type="video/mp4" />
       </video>
 
+      {/* Background layers and effects */}
       <div className="hail-board-overlay" />
       <div className="hail-board-stars" />
       <div className="hail-board-fog hail-board-fog-one" />
@@ -163,6 +176,7 @@ export default function Leaderboard() {
 
       <div className="hail-board-shell">
         <div className="hail-board-panel">
+          {/* Page heading and top action buttons */}
           <div className="hail-board-header">
             <div className="hail-board-title-wrap">
               <p className="hail-board-kicker">Frozen records</p>
@@ -185,7 +199,7 @@ export default function Leaderboard() {
                 className="hail-board-back-btn"
                 onClick={() => navigate("/dashboard")}
               >
-                ⟵ Back
+                Back
               </button>
 
               <button
@@ -198,12 +212,14 @@ export default function Leaderboard() {
             </div>
           </div>
 
+          {/* Error message if loading fails */}
           {error && (
             <div className="hail-board-alert hail-board-alert-error">
               {error}
             </div>
           )}
 
+          {/* Summary cards */}
           <div className="hail-summary-grid">
             <div className="hail-summary-card icy-blue">
               <span className="hail-summary-label">Total Players</span>
@@ -232,6 +248,7 @@ export default function Leaderboard() {
             </div>
           </div>
 
+          {/* Overall player leaderboard */}
           <section className="hail-section">
             <div className="hail-section-head">
               <div>
@@ -312,6 +329,7 @@ export default function Leaderboard() {
                   </table>
                 </div>
 
+                {/* Button to expand or collapse the player list */}
                 {filteredPlayers.length > 10 && (
                   <div className="hail-action-row">
                     <button
@@ -326,6 +344,7 @@ export default function Leaderboard() {
             )}
           </section>
 
+          {/* Top individual match sessions */}
           <section className="hail-section">
             <div className="hail-section-head">
               <div>
@@ -380,7 +399,7 @@ export default function Leaderboard() {
                                 session.result === "win" ? "win" : "lose"
                               }`}
                             >
-                              {session.result === "win" ? "Win 🏆" : "Lose 🌊"}
+                              {session.result === "win" ? "Win" : "Lose"}
                             </span>
                           </td>
                           <td>{session.correctAnswers}</td>
@@ -394,6 +413,7 @@ export default function Leaderboard() {
                   </table>
                 </div>
 
+                {/* Button to expand or collapse the session list */}
                 {sessions.length > 10 && (
                   <div className="hail-action-row">
                     <button
