@@ -33,8 +33,75 @@ export default function Game() {
   const [p2Anim, setP2Anim] = useState("HANG_IDLE");
   const [p2Pose, setP2Pose] = useState("HANG");
 
+  const [muted, setMuted] = useState(true);
+  const [audioStarted, setAudioStarted] = useState(false);
+
+  const audioRef = useRef(null);
+  const clickAudioRef = useRef(null);
+  const startAudioRef = useRef(null);
+  const menuAudioRef = useRef(null);
+  const errorAudioRef = useRef(null);
+
   const isLoadingRef = useRef(false);
   const prevMeterRef = useRef(0);
+
+  const navigateTo = (path, sound = "menu") => {
+    if (sound === "start") playStartSound();
+    else playMenuSound();
+
+    setTimeout(() => {
+      navigate(path);
+    }, 250);
+  };
+
+  const playAudio = (audioEl, volume = 0.7) => {
+    if (!audioEl) return;
+    audioEl.currentTime = 0;
+    audioEl.volume = volume;
+    audioEl.play().catch(() => {});
+  };
+
+  const playMuteClickSound = () => {
+    playAudio(clickAudioRef.current, 0.6);
+  };
+
+  const playStartSound = () => {
+    playAudio(startAudioRef.current, 0.75);
+  };
+
+  const playMenuSound = () => {
+    playAudio(menuAudioRef.current, 0.75);
+  };
+
+  const playErrorSound = () => {
+    playAudio(errorAudioRef.current, 0.8);
+  };
+
+  const toggleMute = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    try {
+      playMuteClickSound();
+
+      if (muted) {
+        audio.muted = false;
+        audio.volume = 0.3;
+
+        if (!audioStarted) {
+          await audio.play();
+          setAudioStarted(true);
+        }
+
+        setMuted(false);
+      } else {
+        audio.muted = true;
+        setMuted(true);
+      }
+    } catch (err) {
+      console.warn("Game audio could not start:", err);
+    }
+  };
 
   const calculateFinalScore = () => {
     return (
@@ -52,6 +119,7 @@ export default function Game() {
   const handleLogout = async () => {
     try {
       setLoggingOut(true);
+      playMenuSound();
 
       await axios.post(
         "http://localhost:3001/logout",
@@ -61,8 +129,10 @@ export default function Game() {
     } catch (err) {
       console.warn("Logout failed, continuing anyway.", err?.response || err);
     } finally {
-      setLoggingOut(false);
-      navigate("/login", { replace: true });
+      setTimeout(() => {
+        setLoggingOut(false);
+        navigate("/login", { replace: true });
+      }, 250);
     }
   };
 
@@ -111,6 +181,8 @@ export default function Game() {
           err?.message ||
           "Failed to load questions."
       );
+
+      playErrorSound();
     } finally {
       setPageLoading(false);
       isLoadingRef.current = false;
@@ -236,6 +308,7 @@ export default function Game() {
     if (!current) return;
 
     setLocked(true);
+    playMenuSound();
 
     const normalize = (s) => String(s).trim().toLowerCase();
     const correct = normalize(choice) === normalize(current.answer);
@@ -264,6 +337,7 @@ export default function Game() {
       setMeter((m) => m - 1);
       setWrongAnswers((w) => w + 1);
       setStreak(0);
+      playErrorSound();
 
       setTimeout(async () => {
         await nextQuestion();
@@ -273,6 +347,8 @@ export default function Game() {
   };
 
   const resetGame = async () => {
+    playStartSound();
+
     setMeter(0);
     setStreak(0);
     setStatus("playing");
@@ -366,29 +442,44 @@ export default function Game() {
   if (pageLoading) {
     return (
       <div className="scene hail-game-page">
+        <audio ref={audioRef} loop preload="auto" muted>
+          <source src="/sounds/icy-wind.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={clickAudioRef} preload="auto">
+          <source src="/sounds/ui-click.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={startAudioRef} preload="auto">
+          <source src="/sounds/start-voyage.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={menuAudioRef} preload="auto">
+          <source src="/sounds/open-register.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={errorAudioRef} preload="auto">
+          <source src="/sounds/error-buzz.mp3" type="audio/mpeg" />
+        </audio>
+
         <div className="hail-game-overlay" />
         <div className="hail-stars layer" />
-        <div className="hail-moon-glow layer" />
-        <div className="hail-moon layer" />
-        <div className="hail-cloud hail-cloud-1 layer" />
-        <div className="hail-cloud hail-cloud-2 layer" />
-        <div className="hail-cloud hail-cloud-3 layer" />
-        <div className="hail-snow layer">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <span key={i} className={`snowflake snowflake-${i + 1}`}>✦</span>
-          ))}
-        </div>
         <div className="hail-wave hail-wave-back layer" />
         <div className="hail-wave hail-wave-mid layer" />
         <div className="hail-wave hail-wave-front layer" />
+        <div className="hail-wave hail-wave-extra layer" />
 
         <div className="hail-game-shell loadingShell">
           <div className="hail-loading-card">
-            <div className="hail-mini-badge">Preparing Voyage</div>
-            <h2>Loading Questions...</h2>
-            <p>The sea is getting ready for your next round.</p>
+            <div className="hail-mini-badge">Atlantic Crossing</div>
+            <h2>Preparing the Voyage...</h2>
+            <p>The night sea is gathering your next round.</p>
           </div>
         </div>
+
+        <button className="hail-sound-btn" onClick={toggleMute}>
+          {muted ? "🔇 Muted" : "🔊 Sound On"}
+        </button>
       </div>
     );
   }
@@ -396,16 +487,32 @@ export default function Game() {
   if (!questions.length) {
     return (
       <div className="scene hail-game-page">
+        <audio ref={audioRef} loop preload="auto" muted>
+          <source src="/sounds/icy-wind.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={clickAudioRef} preload="auto">
+          <source src="/sounds/ui-click.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={startAudioRef} preload="auto">
+          <source src="/sounds/start-voyage.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={menuAudioRef} preload="auto">
+          <source src="/sounds/open-register.mp3" type="audio/mpeg" />
+        </audio>
+
+        <audio ref={errorAudioRef} preload="auto">
+          <source src="/sounds/error-buzz.mp3" type="audio/mpeg" />
+        </audio>
+
         <div className="hail-game-overlay" />
         <div className="hail-stars layer" />
-        <div className="hail-moon-glow layer" />
-        <div className="hail-moon layer" />
-        <div className="hail-cloud hail-cloud-1 layer" />
-        <div className="hail-cloud hail-cloud-2 layer" />
-        <div className="hail-cloud hail-cloud-3 layer" />
         <div className="hail-wave hail-wave-back layer" />
         <div className="hail-wave hail-wave-mid layer" />
         <div className="hail-wave hail-wave-front layer" />
+        <div className="hail-wave hail-wave-extra layer" />
 
         <div className="hail-game-shell loadingShell">
           <div className="hail-loading-card errorCard">
@@ -414,12 +521,18 @@ export default function Game() {
             <p>{loadError || "Unknown error"}</p>
 
             <div className="hail-result-actions">
-              <button className="hail-ui-btn primary" onClick={loadQuestions}>
+              <button
+                className="hail-ui-btn primary"
+                onClick={() => {
+                  playStartSound();
+                  loadQuestions();
+                }}
+              >
                 Retry
               </button>
               <button
                 className="hail-ui-btn secondary"
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigateTo("/dashboard")}
               >
                 Back
               </button>
@@ -433,6 +546,10 @@ export default function Game() {
             </div>
           </div>
         </div>
+
+        <button className="hail-sound-btn" onClick={toggleMute}>
+          {muted ? "🔇 Muted" : "🔊 Sound On"}
+        </button>
       </div>
     );
   }
@@ -442,48 +559,50 @@ export default function Game() {
 
   return (
     <div className="scene hail-game-page">
+      <audio ref={audioRef} loop preload="auto" muted>
+        <source src="/sounds/icy-wind.mp3" type="audio/mpeg" />
+      </audio>
+
+      <audio ref={clickAudioRef} preload="auto">
+        <source src="/sounds/ui-click.mp3" type="audio/mpeg" />
+      </audio>
+
+      <audio ref={startAudioRef} preload="auto">
+        <source src="/sounds/start-voyage.mp3" type="audio/mpeg" />
+      </audio>
+
+      <audio ref={menuAudioRef} preload="auto">
+        <source src="/sounds/open-register.mp3" type="audio/mpeg" />
+      </audio>
+
+      <audio ref={errorAudioRef} preload="auto">
+        <source src="/sounds/error-buzz.mp3" type="audio/mpeg" />
+      </audio>
+
       <div className="hail-game-overlay" />
       <div className="hail-stars layer" />
-      <div className="hail-moon-glow layer" />
-      <div className="hail-moon layer" />
-      <div className="hail-cloud hail-cloud-1 layer" />
-      <div className="hail-cloud hail-cloud-2 layer" />
-      <div className="hail-cloud hail-cloud-3 layer" />
-
-      <div className="hail-snow layer">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <span key={i} className={`snowflake snowflake-${i + 1}`}>✦</span>
-        ))}
-      </div>
-
-      <div className="hail-sparkles layer">
-        <span className="spark spark-1" />
-        <span className="spark spark-2" />
-        <span className="spark spark-3" />
-        <span className="spark spark-4" />
-        <span className="spark spark-5" />
-      </div>
 
       <div className="hail-wave hail-wave-back layer" />
       <div className="hail-wave hail-wave-mid layer" />
       <div className="hail-wave hail-wave-front layer" />
+      <div className="hail-wave hail-wave-extra layer" />
 
       <div className="hail-game-shell">
         <section className="hail-game-card">
           <header className="hail-game-topbar">
             <div className="hail-brand-block">
-              <div className="hail-game-kicker">Frozen Duel</div>
-              <h1 className="hail-game-title">Tug of War Quiz</h1>
+              <div className="hail-game-kicker">Jack & Rose • Night of Fate</div>
+              <h1 className="hail-game-title">Titanic Tug of Fate</h1>
             </div>
 
             <div className="hail-top-actions">
               <div className="hail-status-chip">
                 <span className="status-dot" />
                 {status === "playing"
-                  ? "Battle Active"
+                  ? "Hold the Plank"
                   : status === "win"
-                  ? "Victory"
-                  : "Defeat"}
+                  ? "Love Survives"
+                  : "The Sea Takes Over"}
               </div>
 
               <button
@@ -500,13 +619,14 @@ export default function Game() {
             <section className="hail-left-panel">
               <div className="hail-stage-card">
                 <div className="hail-stage-header">
-                  <div className="hail-stage-label">The Frozen Deck</div>
+                  <div className="hail-stage-label">The Atlantic Plank</div>
                   <div className="hail-category-pill">{current.category}</div>
                 </div>
 
                 <div className="tugStage">
                   <div className="tugArena">
                     <div className="hail-stage-glow" />
+                    <div className="hail-water-glow" />
 
                     <img
                       src={plankImg}
@@ -516,8 +636,6 @@ export default function Game() {
                         transform: `translateX(calc(-50% + ${meter * 8}px)) rotate(${meter * 1.5}deg)`,
                       }}
                     />
-
-                    
 
                     <div
                       className={`playerAnchor playerAnchorLeft pose-${p2Pose.toLowerCase()} ${
@@ -551,9 +669,9 @@ export default function Game() {
 
                 <div className="hail-meter-card">
                   <div className="hail-meter-header">
-                    <span>Computer</span>
-                    <span className="hail-meter-value">Meter {meter}</span>
-                    <span>You</span>
+                    <span>Rose</span>
+                    <span className="hail-meter-value">Balance {meter}</span>
+                    <span>Jack</span>
                   </div>
 
                   <div className="hail-meter-track">
@@ -563,25 +681,6 @@ export default function Game() {
                     />
                     <div className="hail-meter-center" />
                   </div>
-
-                  <div className="hail-stats-row">
-                    <div className="hail-stat-pill">
-                      <span>Streak</span>
-                      <strong>{streak}</strong>
-                    </div>
-                    <div className="hail-stat-pill">
-                      <span>Correct</span>
-                      <strong>{correctAnswers}</strong>
-                    </div>
-                    <div className="hail-stat-pill">
-                      <span>Wrong</span>
-                      <strong>{wrongAnswers}</strong>
-                    </div>
-                    <div className="hail-stat-pill">
-                      <span>Best</span>
-                      <strong>{bestStreak}</strong>
-                    </div>
-                  </div>
                 </div>
               </div>
             </section>
@@ -590,7 +689,7 @@ export default function Game() {
               {status !== "playing" ? (
                 <div className="hail-result-panel">
                   <div className="hail-mini-badge">
-                    {status === "win" ? "Glorious Finish" : "Storm Took Over"}
+                    {status === "win" ? "A Heart Still Holds On" : "The Atlantic Wins"}
                   </div>
 
                   <h2 className="hail-result-title">
@@ -599,8 +698,8 @@ export default function Game() {
 
                   <p className="hail-result-copy">
                     {status === "win"
-                      ? "You conquered the icy duel and claimed the final plank."
-                      : "The frozen sea won this round, but the next voyage is yours to take."}
+                      ? "You held your place above the freezing sea and kept the last fragile hope alive."
+                      : "The cold Atlantic claimed the moment, but another dawn may still belong to you."}
                   </p>
 
                   <div className="hail-score-box">
@@ -622,18 +721,18 @@ export default function Game() {
                       <strong>{bestStreak}</strong>
                     </div>
                     <div className="hail-summary-tile">
-                      <span>Final Meter</span>
+                      <span>Final Balance</span>
                       <strong>{meter}</strong>
                     </div>
                   </div>
 
                   <div className="hail-result-actions">
                     <button className="hail-ui-btn primary" onClick={resetGame}>
-                      Play Again
+                      Sail Again
                     </button>
                     <button
                       className="hail-ui-btn secondary"
-                      onClick={() => navigate("/dashboard")}
+                      onClick={() => navigateTo("/dashboard")}
                     >
                       Back to Dashboard
                     </button>
@@ -642,8 +741,8 @@ export default function Game() {
               ) : (
                 <div className="hail-question-panel">
                   <div className="hail-question-top">
-                    <div className="hail-mini-badge">Question {idx + 1}</div>
-                    <div className="hail-easy-pill">Easy Voyage</div>
+                    <div className="hail-mini-badge">Chapter {idx + 1}</div>
+                    <div className="hail-easy-pill">Ocean Trial</div>
                   </div>
 
                   <div className="hail-question-box">
@@ -664,13 +763,13 @@ export default function Game() {
                   </div>
 
                   <div className="hail-side-note">
-                    Choose wisely. Each answer shifts the balance across the freezing sea.
+                    Choose with care. Every answer shifts the fragile balance between survival and the sea.
                   </div>
 
                   <div className="hail-panel-actions">
                     <button
                       className="hail-ui-btn secondary"
-                      onClick={() => navigate("/dashboard")}
+                      onClick={() => navigateTo("/dashboard")}
                     >
                       Quit
                     </button>
@@ -681,6 +780,10 @@ export default function Game() {
           </div>
         </section>
       </div>
+
+      <button className="hail-sound-btn" onClick={toggleMute}>
+        {muted ? "🔇 Muted" : "🔊 Sound On"}
+      </button>
     </div>
   );
 }

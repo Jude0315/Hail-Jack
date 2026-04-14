@@ -19,6 +19,8 @@ function Login() {
   const startAudioRef = useRef(null);
   const registerAudioRef = useRef(null);
   const errorAudioRef = useRef(null);
+  const typingAudioRef = useRef(null);
+  const lastTypeTimeRef = useRef(0);
 
   const navigate = useNavigate();
 
@@ -70,6 +72,23 @@ function Login() {
 
   const playErrorSound = () => {
     playAudio(errorAudioRef.current, 0.8);
+  };
+
+  const playTypingSound = () => {
+    const audio = typingAudioRef.current;
+    if (!audio || muted) return;
+
+    const now = Date.now();
+    if (now - lastTypeTimeRef.current < 45) return;
+    lastTypeTimeRef.current = now;
+
+    try {
+      audio.currentTime = 0;
+      audio.volume = 0.18;
+      audio.play().catch(() => {});
+    } catch {
+      // ignore playback failures
+    }
   };
 
   const toggleMute = async () => {
@@ -168,6 +187,10 @@ function Login() {
           <source src="/sounds/error-buzz.mp3" type="audio/mpeg" />
         </audio>
 
+        <audio ref={typingAudioRef} preload="auto">
+          <source src="/sounds/typewriter-key.mp3" type="audio/mpeg" />
+        </audio>
+
         <div className="hail-login-overlay" />
         <div className="hail-stars layer" />
         <div className="hail-moon layer" />
@@ -210,6 +233,10 @@ function Login() {
 
       <audio ref={errorAudioRef} preload="auto">
         <source src="/sounds/error-buzz.mp3" type="audio/mpeg" />
+      </audio>
+
+      <audio ref={typingAudioRef} preload="auto">
+        <source src="/sounds/typewriter-key.mp3" type="audio/mpeg" />
       </audio>
 
       <div className="hail-login-overlay" />
@@ -284,7 +311,10 @@ function Login() {
                 type="email"
                 placeholder="Enter your email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  playTypingSound();
+                }}
                 className="hail-input"
               />
             </div>
@@ -296,7 +326,10 @@ function Login() {
                 type="password"
                 placeholder="Enter your password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  playTypingSound();
+                }}
                 className="hail-input"
               />
             </div>

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap");
 
 * {
   box-sizing: border-box;
@@ -18,8 +18,9 @@ body {
   height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(circle at 50% 14%, rgba(170, 230, 255, 0.16) 0%, rgba(170, 230, 255, 0) 26%),
-    linear-gradient(180deg, #061427 0%, #0a2240 34%, #103a67 70%, #0d5079 100%);
+    radial-gradient(circle at 50% 10%, rgba(200, 230, 255, 0.12) 0%, rgba(200, 230, 255, 0) 30%),
+    radial-gradient(circle at 50% 80%, rgba(20, 90, 140, 0.35) 0%, rgba(10, 40, 80, 0) 60%),
+    linear-gradient(180deg, #020812 0%, #051a33 40%, #082a4f 70%, #0c4a6e 100%);
 }
 
 .hail-game-overlay {
@@ -27,9 +28,9 @@ body {
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(2, 7, 18, 0.05) 0%,
-    rgba(2, 7, 18, 0.1) 44%,
-    rgba(2, 7, 18, 0.2) 100%
+    rgba(2, 7, 18, 0.06) 0%,
+    rgba(2, 7, 18, 0.12) 44%,
+    rgba(2, 7, 18, 0.22) 100%
   );
   z-index: 0;
 }
@@ -42,7 +43,8 @@ body {
   position: absolute;
   inset: 0;
   z-index: 1;
-  opacity: 0.7;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.35));
   background-image:
     radial-gradient(circle at 10% 18%, rgba(255,255,255,0.95) 0 1.5px, transparent 2.5px),
     radial-gradient(circle at 18% 8%, rgba(255,255,255,0.7) 0 1px, transparent 2px),
@@ -99,6 +101,32 @@ body {
   animation: waveMove 7.5s linear infinite;
 }
 
+.hail-wave-extra {
+  position: absolute;
+  left: -50%;
+  width: 200%;
+  border-radius: 45% 55% 0 0 / 100% 100% 0 0;
+  z-index: 2;
+  bottom: 10px;
+  height: 200px;
+  opacity: 0.5;
+  background: rgba(25, 130, 190, 0.35);
+  animation: waveMove 9s linear infinite;
+}
+
+.hail-water-glow {
+  position: absolute;
+  left: 50%;
+  bottom: 40px;
+  transform: translateX(-50%);
+  width: 420px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(120, 220, 255, 0.25) 0%, rgba(120, 220, 255, 0.08) 40%, transparent 70%);
+  z-index: 2;
+  pointer-events: none;
+}
+
 /* =========================
    PAGE SHELL
 ========================= */
@@ -146,21 +174,24 @@ body {
 .hail-game-kicker {
   font-size: 0.76rem;
   font-weight: 800;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: #bde9ff;
-  margin-bottom: 2px;
+  color: #9fd8ff;
+  margin-bottom: 4px;
 }
 
 .hail-game-title {
   margin: 0;
-  font-family: "Fredoka", sans-serif;
-  font-size: clamp(1.7rem, 3vw, 2.75rem);
+  font-family: "Playfair Display", serif;
+  font-size: clamp(2rem, 3vw, 3rem);
+  letter-spacing: 0.08em;
   line-height: 1;
-  color: #fff5cf;
+  color: #fff6d6;
+  text-transform: uppercase;
   text-shadow:
-    0 3px 0 rgba(100, 59, 15, 0.32),
-    0 10px 18px rgba(0, 0, 0, 0.18);
+    0 2px 0 #7a5c2e,
+    0 6px 14px rgba(0, 0, 0, 0.4),
+    0 0 25px rgba(255, 230, 150, 0.25);
 }
 
 .hail-top-actions {
@@ -223,9 +254,12 @@ body {
   grid-template-rows: auto 1fr auto;
   background: linear-gradient(180deg, rgba(9, 28, 50, 0.7) 0%, rgba(9, 29, 53, 0.86) 100%);
   border: 1px solid rgba(178, 225, 255, 0.08);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 0 28px rgba(70, 165, 255, 0.08);
   padding: 12px 12px 10px;
   min-height: 0;
+  transform: perspective(1200px) rotateX(2deg);
 }
 
 .hail-stage-header {
@@ -302,10 +336,6 @@ body {
   pointer-events: none;
 }
 
-/* =========================
-   PLANK (CENTERED + HIGHER)
-========================= */
-
 .plankImg {
   width: clamp(340px, 40vw, 420px);
   position: absolute;
@@ -317,10 +347,6 @@ body {
   filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.24));
 }
 
-/* =========================
-   PLAYER BASE
-========================= */
-
 .playerAnchor {
   position: absolute;
   bottom: 15px;
@@ -328,12 +354,11 @@ body {
   height: 256px;
   z-index: 4;
   transition:
-    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 16.5s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 1.5s ease;
   opacity: 1;
 }
 
-/* closer to plank center */
 .playerAnchorLeft {
   left: calc(50% - 160px);
 }
@@ -345,10 +370,6 @@ body {
 .playerFadeOut {
   opacity: 0;
 }
-
-/* =========================
-   SPRITE CONTAINER
-========================= */
 
 .playerAvatar {
   width: 256px;
@@ -364,10 +385,6 @@ body {
   transform: none;
 }
 
-/* =========================
-   RIGHT PLAYER (YOU)
-========================= */
-
 .playerAnchorRight.pose-hang {
   transform: translate(-50%, 20px);
 }
@@ -377,17 +394,12 @@ body {
 }
 
 .playerAnchorRight.pose-plank {
-
   transform: translate(-50%, -135px);
 }
 
 .playerAnchorRight.pose-sink {
   transform: translate(-50%, 110px);
 }
-
-/* =========================
-   LEFT PLAYER (COMPUTER)
-========================= */
 
 .playerAnchorLeft.pose-hang {
   transform: translate(-50%, 40px);
@@ -405,10 +417,6 @@ body {
   transform: translate(-50%, 110px);
 }
 
-/* =========================
-   SUBTLE SCALE POLISH
-========================= */
-
 .playerAnchor.pose-plank .playerAvatar {
   transform: scale(1.05);
 }
@@ -416,10 +424,6 @@ body {
 .playerAnchor.pose-hang .playerAvatar {
   transform: scale(0.95);
 }
-
-/* =========================
-   SHADOW (DEPTH)
-========================= */
 
 .playerAvatar div {
   filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.35));
@@ -479,15 +483,10 @@ body {
   box-shadow: 0 0 12px rgba(255, 245, 205, 0.55);
 }
 
-/* stats removed intentionally */
 .hail-stats-row,
 .hail-stat-pill {
   display: none;
 }
-
-/* =========================
-   METER MARKER
-========================= */
 
 .marker {
   position: absolute;
@@ -713,8 +712,9 @@ body {
   position: relative;
   z-index: 1;
   margin: 14px 0 8px;
-  font-family: "Fredoka", sans-serif;
+  font-family: "Playfair Display", serif;
   font-size: 2rem;
+  letter-spacing: 0.06em;
 }
 
 .hail-loading-card p {
@@ -851,10 +851,6 @@ body {
   .plankImg {
     bottom: 76px;
   }
-
-  .marker {
-    bottom: 146px;
-  }
 }
 
 @media (max-width: 680px) {
@@ -948,8 +944,37 @@ body {
   .playerAnchorLeft.pose-sink {
     transform: translate(-50%, 94px);
   }
+}
 
-  .marker {
-    bottom: 116px;
+.hail-sound-btn {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 30;
+  border: 1px solid rgba(182, 233, 255, 0.18);
+  background: rgba(8, 22, 36, 0.58);
+  color: #eaf8ff;
+  backdrop-filter: blur(12px);
+  padding: 0.7rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  transition: transform 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+}
+
+.hail-sound-btn:hover {
+  transform: translateX(-50%) translateY(-2px);
+  background: rgba(12, 31, 49, 0.72);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+}
+
+@media (max-width: 576px) {
+  .hail-sound-btn {
+    bottom: 18px;
+    font-size: 0.86rem;
+    padding: 0.65rem 1rem;
   }
 }

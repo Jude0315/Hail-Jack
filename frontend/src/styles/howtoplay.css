@@ -1,0 +1,725 @@
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap");
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Nunito", sans-serif;
+}
+
+.hail-how-page {
+  --mx: 0;
+  --my: 0;
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  --card-rx: 0deg;
+  --card-ry: 0deg;
+
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  color: #f5fcff;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(188, 230, 255, 0.16) 0%, rgba(188, 230, 255, 0) 28%),
+    linear-gradient(180deg, #04101f 0%, #08203d 30%, #0b3862 66%, #0c537d 100%);
+}
+
+.hail-how-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(2, 7, 18, 0.08) 0%,
+    rgba(2, 7, 18, 0.16) 48%,
+    rgba(2, 7, 18, 0.28) 100%
+  );
+  z-index: 0;
+}
+
+.layer {
+  pointer-events: none;
+}
+
+.hail-how-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.88;
+  background-image:
+    radial-gradient(circle at 9% 16%, rgba(255,255,255,0.95) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 17% 8%, rgba(255,255,255,0.72) 0 1px, transparent 2px),
+    radial-gradient(circle at 25% 21%, rgba(255,255,255,0.86) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 34% 12%, rgba(255,255,255,0.72) 0 1px, transparent 2px),
+    radial-gradient(circle at 45% 18%, rgba(255,255,255,0.92) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 57% 9%, rgba(255,255,255,0.7) 0 1px, transparent 2px),
+    radial-gradient(circle at 65% 20%, rgba(255,255,255,0.86) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 76% 13%, rgba(255,255,255,0.82) 0 1px, transparent 2px),
+    radial-gradient(circle at 86% 7%, rgba(255,255,255,0.95) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 93% 18%, rgba(255,255,255,0.8) 0 1px, transparent 2px);
+  animation: twinkle 4.8s ease-in-out infinite alternate;
+}
+
+.hail-how-moon {
+  position: absolute;
+  top: 64px;
+  right: 9%;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  z-index: 1;
+  background: radial-gradient(circle, #fffde8 0%, #ffeeb8 58%, #ffd772 100%);
+  box-shadow: inset -10px -8px 0 rgba(255, 225, 140, 0.3);
+  transform: translate(calc(var(--mx) * -12px), calc(var(--my) * -12px));
+  transition: transform 0.2s ease-out;
+}
+
+.hail-how-moon-glow {
+  position: absolute;
+  top: 36px;
+  right: calc(9% - 34px);
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  z-index: 0;
+  background: radial-gradient(circle, rgba(255, 225, 140, 0.32) 0%, rgba(255, 225, 140, 0.08) 45%, rgba(255, 225, 140, 0) 75%);
+  animation: pulseGlow 5s ease-in-out infinite;
+}
+
+.hail-how-cloud {
+  position: absolute;
+  z-index: 1;
+  width: 180px;
+  height: 60px;
+  border-radius: 999px;
+  background: rgba(217, 237, 255, 0.08);
+  filter: blur(2px);
+}
+
+.hail-how-cloud::before,
+.hail-how-cloud::after {
+  content: "";
+  position: absolute;
+  background: rgba(217, 237, 255, 0.08);
+  border-radius: 50%;
+}
+
+.hail-how-cloud::before {
+  width: 70px;
+  height: 70px;
+  top: -22px;
+  left: 24px;
+}
+
+.hail-how-cloud::after {
+  width: 90px;
+  height: 90px;
+  top: -34px;
+  right: 20px;
+}
+
+.hail-how-cloud-1 {
+  top: 96px;
+  left: -220px;
+  animation: cloudDrift 24s linear infinite;
+}
+
+.hail-how-cloud-2 {
+  top: 142px;
+  left: -300px;
+  transform: scale(0.8);
+  animation: cloudDrift 32s linear infinite;
+}
+
+.hail-how-cloud-3 {
+  top: 58px;
+  left: -260px;
+  transform: scale(0.65);
+  animation: cloudDrift 40s linear infinite;
+}
+
+.hail-how-snow {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.hail-howflake {
+  position: absolute;
+  top: -12%;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.95rem;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.35);
+  animation-name: snowfall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.hail-howflake-1  { left: 6%;  animation-duration: 10s; animation-delay: 0s; }
+.hail-howflake-2  { left: 14%; animation-duration: 12s; animation-delay: 1s; }
+.hail-howflake-3  { left: 22%; animation-duration: 11s; animation-delay: 3s; }
+.hail-howflake-4  { left: 30%; animation-duration: 14s; animation-delay: 2s; }
+.hail-howflake-5  { left: 38%; animation-duration: 9s;  animation-delay: 4s; }
+.hail-howflake-6  { left: 46%; animation-duration: 12s; animation-delay: 1.5s; }
+.hail-howflake-7  { left: 54%; animation-duration: 14s; animation-delay: 5s; }
+.hail-howflake-8  { left: 62%; animation-duration: 10s; animation-delay: 2.5s; }
+.hail-howflake-9  { left: 70%; animation-duration: 13s; animation-delay: 0.5s; }
+.hail-howflake-10 { left: 78%; animation-duration: 11s; animation-delay: 6s; }
+.hail-howflake-11 { left: 86%; animation-duration: 15s; animation-delay: 3.5s; }
+.hail-howflake-12 { left: 94%; animation-duration: 12s; animation-delay: 1s; }
+.hail-howflake-13 { left: 10%; animation-duration: 16s; animation-delay: 2.2s; }
+.hail-howflake-14 { left: 28%; animation-duration: 15s; animation-delay: 4.4s; }
+.hail-howflake-15 { left: 49%; animation-duration: 13s; animation-delay: 2.8s; }
+.hail-howflake-16 { left: 67%; animation-duration: 14s; animation-delay: 5.5s; }
+.hail-howflake-17 { left: 82%; animation-duration: 16s; animation-delay: 3.2s; }
+.hail-howflake-18 { left: 97%; animation-duration: 14s; animation-delay: 1.8s; }
+
+.hail-how-wave {
+  position: absolute;
+  left: -50%;
+  width: 200%;
+  border-radius: 45% 55% 0 0 / 100% 100% 0 0;
+}
+
+.hail-how-wave-back {
+  z-index: 1;
+  bottom: 90px;
+  height: 150px;
+  opacity: 0.42;
+  background: rgba(96, 193, 255, 0.28);
+  animation: waveMove 14s linear infinite;
+}
+
+.hail-how-wave-mid {
+  z-index: 2;
+  bottom: 38px;
+  height: 185px;
+  opacity: 0.64;
+  background: rgba(45, 151, 223, 0.48);
+  animation: waveMoveReverse 10s linear infinite;
+}
+
+.hail-how-wave-front {
+  z-index: 3;
+  bottom: -16px;
+  height: 240px;
+  opacity: 0.9;
+  background: rgba(18, 111, 177, 0.76);
+  animation: waveMove 7.5s linear infinite;
+}
+
+.hail-how-shell {
+  position: relative;
+  z-index: 5;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 26px 20px 90px;
+}
+
+.hail-how-card {
+  width: min(1240px, 100%);
+  min-height: min(88vh, 860px);
+  border-radius: 34px;
+  padding: 24px;
+  background: rgba(7, 26, 47, 0.62);
+  border: 1px solid rgba(181, 231, 255, 0.14);
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  transform:
+    perspective(1200px)
+    rotateX(var(--card-rx))
+    rotateY(var(--card-ry));
+  transition: transform 0.14s ease-out;
+}
+
+.hail-how-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.hail-how-kicker {
+  margin: 0 0 6px;
+  color: #a8e8ff;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hail-how-title {
+  margin: 0;
+  font-family: "Playfair Display", serif;
+  font-size: clamp(2.4rem, 4vw, 4rem);
+  line-height: 0.95;
+  color: #fff4d0;
+  text-shadow:
+    0 4px 0 rgba(122, 92, 46, 0.35),
+    0 10px 22px rgba(0, 0, 0, 0.28);
+}
+
+.hail-how-layout {
+  display: grid;
+  grid-template-columns: 1.02fr 0.98fr;
+  gap: 22px;
+  align-items: stretch;
+}
+
+.hail-how-left,
+.hail-how-right {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.hail-how-hero,
+.hail-how-preview,
+.hail-how-rule-card,
+.hail-how-tip,
+.hail-how-actions {
+  border-radius: 26px;
+}
+
+.hail-how-hero,
+.hail-how-preview,
+.hail-how-rule-card {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(185, 232, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.hail-how-hero {
+  padding: 24px;
+}
+
+.hail-how-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(255, 236, 178, 0.12);
+  color: #fff2c5;
+  border: 1px solid rgba(255, 236, 178, 0.12);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hail-how-badge.blue {
+  background: rgba(160, 227, 255, 0.12);
+  color: #d9f4ff;
+  border-color: rgba(160, 227, 255, 0.12);
+}
+
+.hail-how-hero h2 {
+  margin: 14px 0 10px;
+  font-family: "Fredoka", sans-serif;
+  font-size: clamp(1.45rem, 2vw, 2rem);
+  line-height: 1.2;
+  color: #f5fbff;
+}
+
+.hail-how-hero > p {
+  margin: 0;
+  color: #d6efff;
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+.hail-how-quote {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(185, 232, 255, 0.1);
+}
+
+.hail-how-quote span {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: #9fe3ff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hail-how-quote p {
+  margin: 0;
+  color: #eefbff;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.hail-how-preview {
+  padding: 20px;
+}
+
+.hail-how-preview-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 18px;
+  color: #d7f3ff;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.hail-how-meter-demo {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.hail-how-side {
+  color: #f2fbff;
+  font-weight: 800;
+}
+
+.hail-how-bar {
+  position: relative;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.16);
+}
+
+.hail-how-bar-fill {
+  width: 62%;
+  height: 100%;
+  background: linear-gradient(90deg, #4db2ff 0%, #70f2ff 100%);
+  box-shadow: 0 0 16px rgba(94, 219, 255, 0.34);
+}
+
+.hail-how-bar-center {
+  position: absolute;
+  left: 50%;
+  top: -2px;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(255, 245, 205, 0.92);
+}
+
+.hail-how-preview-steps {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.hail-how-mini-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(8, 28, 48, 0.42);
+  border: 1px solid rgba(185, 232, 255, 0.08);
+}
+
+.hail-how-mini-step strong {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(49, 178, 255, 0.18);
+  color: #e8f8ff;
+  font-family: "Fredoka", sans-serif;
+}
+
+.hail-how-mini-step span {
+  color: #eaf6ff;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.hail-how-rule-card {
+  padding: 20px;
+  flex: 1;
+}
+
+.hail-how-rule-head {
+  margin-bottom: 14px;
+}
+
+.hail-how-rule-list {
+  display: grid;
+  gap: 12px;
+}
+
+.hail-how-rule-item {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(8, 28, 48, 0.42);
+  border: 1px solid rgba(185, 232, 255, 0.08);
+}
+
+.hail-how-rule-num {
+  height: 48px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(49, 178, 255, 0.16);
+  color: #effbff;
+  font-family: "Fredoka", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.hail-how-rule-item h3 {
+  margin: 2px 0 6px;
+  color: #fff3ce;
+  font-size: 1.04rem;
+}
+
+.hail-how-rule-item p {
+  margin: 0;
+  color: #d8f0ff;
+  line-height: 1.6;
+}
+
+.hail-how-tip-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.hail-how-tip {
+  padding: 16px;
+  background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(185, 232, 255, 0.12);
+}
+
+.hail-how-tip span {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: #9fe3ff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hail-how-tip p {
+  margin: 0;
+  color: #edf8ff;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.hail-how-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: auto;
+}
+
+.hail-how-btn {
+  border-radius: 18px;
+  padding: 14px 18px;
+  font-size: 0.98rem;
+  font-weight: 900;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease, opacity 0.18s ease;
+  cursor: pointer;
+}
+
+.hail-how-btn.primary {
+  border: none;
+  color: #ffffff;
+  background: linear-gradient(180deg, #31b1ff 0%, #1167c3 100%);
+  box-shadow: 0 10px 20px rgba(17, 103, 195, 0.28);
+}
+
+.hail-how-btn.primary:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.02);
+  filter: brightness(1.04);
+}
+
+.hail-how-btn.secondary {
+  border: 2px solid rgba(182, 233, 255, 0.18);
+  background: rgba(8, 22, 36, 0.52);
+  color: #eef9ff;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.16);
+}
+
+.hail-how-btn.secondary:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.hail-how-btn.compact {
+  min-height: 42px;
+  padding: 10px 14px;
+}
+
+.hail-sound-btn {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 30;
+  border: 1px solid rgba(182, 233, 255, 0.18);
+  background: rgba(8, 22, 36, 0.58);
+  color: #eaf8ff;
+  backdrop-filter: blur(12px);
+  padding: 0.7rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  transition: transform 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+}
+
+.hail-sound-btn:hover {
+  transform: translateX(-50%) translateY(-2px);
+  background: rgba(12, 31, 49, 0.72);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+}
+
+@keyframes twinkle {
+  0% { opacity: 0.55; }
+  50% { opacity: 0.95; }
+  100% { opacity: 0.7; }
+}
+
+@keyframes pulseGlow {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+}
+
+@keyframes cloudDrift {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(100vw + 420px));
+  }
+}
+
+@keyframes snowfall {
+  0% {
+    transform: translateY(-10vh) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(50vh) translateX(16px) rotate(120deg);
+  }
+  100% {
+    transform: translateY(110vh) translateX(-18px) rotate(240deg);
+    opacity: 0.2;
+  }
+}
+
+@keyframes waveMove {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(12%) translateY(8px);
+  }
+  100% {
+    transform: translateX(24%) translateY(0);
+  }
+}
+
+@keyframes waveMoveReverse {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(-10%) translateY(10px);
+  }
+  100% {
+    transform: translateX(-20%) translateY(0);
+  }
+}
+
+@media (max-width: 980px) {
+  .hail-how-shell {
+    padding: 20px 14px 90px;
+  }
+
+  .hail-how-card {
+    padding: 18px;
+    transform: none;
+  }
+
+  .hail-how-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .hail-how-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 640px) {
+  .hail-how-title {
+    font-size: 2.25rem;
+  }
+
+  .hail-how-preview-steps,
+  .hail-how-tip-grid,
+  .hail-how-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .hail-how-rule-item {
+    grid-template-columns: 48px 1fr;
+  }
+
+  .hail-how-moon {
+    width: 84px;
+    height: 84px;
+    top: 56px;
+    right: 7%;
+  }
+
+  .hail-how-moon-glow {
+    width: 130px;
+    height: 130px;
+    top: 35px;
+    right: calc(7% - 20px);
+  }
+
+  .hail-sound-btn {
+    bottom: 18px;
+    font-size: 0.86rem;
+    padding: 0.65rem 1rem;
+  }
+}

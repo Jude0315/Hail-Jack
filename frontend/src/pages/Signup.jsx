@@ -22,6 +22,8 @@ function Signup() {
   const signupAudioRef = useRef(null);
   const backAudioRef = useRef(null);
   const errorAudioRef = useRef(null);
+  const typingAudioRef = useRef(null);
+  const lastTypeTimeRef = useRef(0);
 
   const navigate = useNavigate();
 
@@ -79,6 +81,23 @@ function Signup() {
 
   const playErrorSound = async () => {
     await playAudio(errorAudioRef.current, 0.8);
+  };
+
+  const playTypingSound = () => {
+    const audio = typingAudioRef.current;
+    if (!audio || muted) return;
+
+    const now = Date.now();
+    if (now - lastTypeTimeRef.current < 45) return;
+    lastTypeTimeRef.current = now;
+
+    try {
+      audio.currentTime = 0;
+      audio.volume = 0.18;
+      audio.play().catch(() => {});
+    } catch {
+      // ignore playback failures
+    }
   };
 
   const toggleMute = async () => {
@@ -229,6 +248,10 @@ function Signup() {
           <source src="/sounds/error-buzz.mp3" type="audio/mpeg" />
         </audio>
 
+        <audio ref={typingAudioRef} preload="auto">
+          <source src="/sounds/typewriter-key.mp3" type="audio/mpeg" />
+        </audio>
+
         <div className="hail-signup-overlay" />
         <div className="hail-stars layer" />
         <div className="hail-moon layer" />
@@ -271,6 +294,10 @@ function Signup() {
 
       <audio ref={errorAudioRef} preload="auto">
         <source src="/sounds/error-buzz.mp3" type="audio/mpeg" />
+      </audio>
+
+      <audio ref={typingAudioRef} preload="auto">
+        <source src="/sounds/typewriter-key.mp3" type="audio/mpeg" />
       </audio>
 
       <div className="hail-signup-overlay" />
@@ -353,7 +380,10 @@ function Signup() {
                 placeholder="Enter your name"
                 className="hail-input"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  playTypingSound();
+                }}
               />
             </div>
 
@@ -365,7 +395,10 @@ function Signup() {
                 placeholder="Enter your email"
                 className="hail-input"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  playTypingSound();
+                }}
               />
             </div>
 
@@ -377,7 +410,10 @@ function Signup() {
                 placeholder="Create a password"
                 className="hail-input"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  playTypingSound();
+                }}
               />
               <small
                 className={`hail-helper ${
@@ -401,7 +437,10 @@ function Signup() {
                 placeholder="Retype your password"
                 className="hail-input"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  playTypingSound();
+                }}
               />
               {confirmPassword && (
                 <small

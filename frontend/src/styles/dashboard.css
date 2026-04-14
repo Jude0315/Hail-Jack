@@ -851,3 +851,36 @@ body {
     bottom: 15%;
   }
 }
+
+.hail-sound-btn {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 30;
+  border: 1px solid rgba(182, 233, 255, 0.18);
+  background: rgba(8, 22, 36, 0.58);
+  color: #eaf8ff;
+  backdrop-filter: blur(12px);
+  padding: 0.7rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  transition: transform 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+}
+
+.hail-sound-btn:hover {
+  transform: translateX(-50%) translateY(-2px);
+  background: rgba(12, 31, 49, 0.72);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+}
+
+@media (max-width: 576px) {
+  .hail-sound-btn {
+    bottom: 18px;
+    font-size: 0.86rem;
+    padding: 0.65rem 1rem;
+  }
+}
