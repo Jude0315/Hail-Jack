@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { PLAYER1_ANIMS } from "../game/player1Animations";
+import { PLAYER2_ANIMS } from "../game/player2Animations";
 
 const FRAME_SIZE = 256;
 const COLS = 20;
 
-export default function Player1Sprite({
+export default function Player2Sprite({
   anim = "HANG_IDLE",
   speed = 0.75,
   onDone = null,
@@ -17,7 +17,7 @@ export default function Player1Sprite({
   const lastTimeRef = useRef(0);
   const doneRef = useRef(false);
 
-  const animData = useMemo(() => PLAYER1_ANIMS[anim], [anim]);
+  const animData = useMemo(() => PLAYER2_ANIMS[anim], [anim]);
 
   useEffect(() => {
     if (!animData) return;
@@ -75,7 +75,7 @@ export default function Player1Sprite({
       style={{
         width: FRAME_SIZE,
         height: FRAME_SIZE,
-        backgroundImage: `url(/src/assets/sprite/player1_sprite_sheet.png)`,
+        backgroundImage: `url(/src/assets/sprite/player2_sprite_sheet.png)`,
         backgroundPosition: `-${col * FRAME_SIZE}px -${row * FRAME_SIZE}px`,
         backgroundRepeat: "no-repeat",
         imageRendering: "pixelated",

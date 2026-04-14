@@ -1,156 +1,907 @@
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap");
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Nunito", sans-serif;
+}
+
 /* =========================
-   TUG AREA ONLY
+   FULL PAGE / ATMOSPHERE
 ========================= */
+
+.hail-game-page {
+  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 14%, rgba(170, 230, 255, 0.16) 0%, rgba(170, 230, 255, 0) 26%),
+    linear-gradient(180deg, #061427 0%, #0a2240 34%, #103a67 70%, #0d5079 100%);
+}
+
+.hail-game-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(2, 7, 18, 0.05) 0%,
+    rgba(2, 7, 18, 0.1) 44%,
+    rgba(2, 7, 18, 0.2) 100%
+  );
+  z-index: 0;
+}
+
+.layer {
+  pointer-events: none;
+}
+
+.hail-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.7;
+  background-image:
+    radial-gradient(circle at 10% 18%, rgba(255,255,255,0.95) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 18% 8%, rgba(255,255,255,0.7) 0 1px, transparent 2px),
+    radial-gradient(circle at 27% 22%, rgba(255,255,255,0.85) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 36% 11%, rgba(255,255,255,0.75) 0 1px, transparent 2px),
+    radial-gradient(circle at 47% 18%, rgba(255,255,255,0.9) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 58% 9%, rgba(255,255,255,0.7) 0 1px, transparent 2px),
+    radial-gradient(circle at 66% 22%, rgba(255,255,255,0.85) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 75% 14%, rgba(255,255,255,0.8) 0 1px, transparent 2px),
+    radial-gradient(circle at 84% 7%, rgba(255,255,255,0.95) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 91% 20%, rgba(255,255,255,0.8) 0 1px, transparent 2px);
+  animation: twinkle 4.5s ease-in-out infinite alternate;
+}
+
+.hail-moon,
+.hail-moon-glow,
+.hail-cloud,
+.hail-snow,
+.hail-sparkles {
+  display: none;
+}
+
+.hail-wave {
+  position: absolute;
+  left: -50%;
+  width: 200%;
+  border-radius: 45% 55% 0 0 / 100% 100% 0 0;
+}
+
+.hail-wave-back {
+  z-index: 1;
+  bottom: 74px;
+  height: 118px;
+  opacity: 0.34;
+  background: rgba(96, 193, 255, 0.22);
+  animation: waveMove 14s linear infinite;
+}
+
+.hail-wave-mid {
+  z-index: 2;
+  bottom: 30px;
+  height: 136px;
+  opacity: 0.5;
+  background: rgba(45, 151, 223, 0.38);
+  animation: waveMoveReverse 10s linear infinite;
+}
+
+.hail-wave-front {
+  z-index: 3;
+  bottom: -20px;
+  height: 170px;
+  opacity: 0.76;
+  background: rgba(18, 111, 177, 0.62);
+  animation: waveMove 7.5s linear infinite;
+}
+
+/* =========================
+   PAGE SHELL
+========================= */
+
+.hail-game-shell {
+  position: relative;
+  z-index: 6;
+  width: 100%;
+  height: 100vh;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hail-game-card {
+  width: min(1380px, 100%);
+  height: min(94vh, 890px);
+  border-radius: 30px;
+  padding: 14px;
+  background: rgba(7, 23, 42, 0.44);
+  border: 1px solid rgba(194, 231, 255, 0.1);
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.hail-game-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 10px;
+  flex: 0 0 auto;
+}
+
+.hail-brand-block {
+  min-width: 0;
+}
+
+.hail-game-kicker {
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #bde9ff;
+  margin-bottom: 2px;
+}
+
+.hail-game-title {
+  margin: 0;
+  font-family: "Fredoka", sans-serif;
+  font-size: clamp(1.7rem, 3vw, 2.75rem);
+  line-height: 1;
+  color: #fff5cf;
+  text-shadow:
+    0 3px 0 rgba(100, 59, 15, 0.32),
+    0 10px 18px rgba(0, 0, 0, 0.18);
+}
+
+.hail-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hail-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(255, 247, 216, 0.08);
+  border: 1px solid rgba(255, 242, 196, 0.1);
+  color: #f6fbff;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #7af7d4;
+  box-shadow: 0 0 14px rgba(122, 247, 212, 0.85);
+}
+
+.hail-game-layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(340px, 0.72fr);
+  gap: 14px;
+}
+
+.hail-left-panel,
+.hail-right-panel {
+  min-height: 0;
+  display: flex;
+}
+
+.hail-stage-card,
+.hail-question-panel,
+.hail-result-panel,
+.hail-loading-card {
+  width: 100%;
+  border-radius: 28px;
+  min-height: 0;
+}
+
+/* =========================
+   LEFT / STAGE
+========================= */
+
+.hail-stage-card {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: linear-gradient(180deg, rgba(9, 28, 50, 0.7) 0%, rgba(9, 29, 53, 0.86) 100%);
+  border: 1px solid rgba(178, 225, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  padding: 12px 12px 10px;
+  min-height: 0;
+}
+
+.hail-stage-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.hail-stage-label,
+.hail-mini-badge,
+.hail-category-pill,
+.hail-easy-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hail-stage-label,
+.hail-mini-badge {
+  background: rgba(255, 236, 178, 0.1);
+  color: #fff2c5;
+  border: 1px solid rgba(255, 236, 178, 0.1);
+}
+
+.hail-category-pill {
+  background: rgba(173, 228, 255, 0.1);
+  color: #d7f3ff;
+  border: 1px solid rgba(173, 228, 255, 0.1);
+}
+
+.hail-easy-pill {
+  background: rgba(122, 247, 212, 0.08);
+  color: #d8fff5;
+  border: 1px solid rgba(122, 247, 212, 0.1);
+}
 
 .tugStage {
   position: relative;
   width: 100%;
-  min-height: 360px;
-  margin: 12px 0 18px;
+  min-height: 420px;
+  margin: 10px 0 10px;
 }
 
 .tugArena {
   position: relative;
   width: 100%;
-  height: 320px;
+  height: 360px;
+  min-height: 395px;
+  border-radius: 24px;
+  overflow: visible;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(136, 223, 255, 0.11) 0%, rgba(136, 223, 255, 0.03) 28%, rgba(136, 223, 255, 0) 60%),
+    linear-gradient(180deg, rgba(7, 29, 53, 0.22) 0%, rgba(8, 30, 56, 0.04) 100%);
 }
 
-/* Longer plank, lower on screen */
-.plankImg {
-  width: 380px;
+.hail-stage-glow {
   position: absolute;
   left: 50%;
-  bottom: 70px;
+  top: 34%;
   transform: translateX(-50%);
-  z-index: 3;
-  transition: transform 1s ease;
+  width: 340px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(136, 223, 255, 0.14) 0%, rgba(136, 223, 255, 0.04) 46%, rgba(136, 223, 255, 0) 80%);
+  pointer-events: none;
 }
 
-/* Player anchor attached near right edge of plank */
+/* =========================
+   PLANK (CENTERED + HIGHER)
+========================= */
+
+.plankImg {
+  width: clamp(340px, 40vw, 420px);
+  position: absolute;
+  left: 50%;
+  bottom: 50px;
+  transform: translateX(-50%);
+  z-index: 3;
+  transition: transform 0.8s ease;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.24));
+}
+
+/* =========================
+   PLAYER BASE
+========================= */
 
 .playerAnchor {
   position: absolute;
-  left: calc(50% + 120px);
-  bottom: 40px;
+  bottom: 15px;
   width: 256px;
   height: 256px;
   z-index: 4;
   transition:
-    transform 13s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 2.6s ease;
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 1.5s ease;
   opacity: 1;
+}
+
+/* closer to plank center */
+.playerAnchorLeft {
+  left: calc(50% - 160px);
+}
+
+.playerAnchorRight {
+  left: calc(50% + 160px);
 }
 
 .playerFadeOut {
   opacity: 0;
 }
 
+/* =========================
+   SPRITE CONTAINER
+========================= */
 
-/* sprite box */
 .playerAvatar {
   width: 256px;
   height: 256px;
   display: grid;
   place-items: center;
-  overflow: hidden;
+  overflow: visible;
   transform-origin: center bottom;
+  transition: transform 0.3s ease;
 }
 
-/* hanging below plank */
-.pose-hang {
-  transform: translate(-37%, 60px);
+.playerAvatarLeft {
+  transform: none;
 }
 
-/* climbing transition: midway */
-.pose-climb {
-  transform: translate(-38%, -150px);
+/* =========================
+   RIGHT PLAYER (YOU)
+========================= */
+
+.playerAnchorRight.pose-hang {
+  transform: translate(-50%, 20px);
 }
 
-/* standing on plank, but not too high */
-.pose-plank {
-  transform: translate(-38%, -150px);
+.playerAnchorRight.pose-climb {
+  transform: translate(-50%, -140px);
 }
 
-/* sinking */
-.pose-sink {
-  transform: translate(-50%, 120px);
+.playerAnchorRight.pose-plank {
+
+  transform: translate(-50%, -135px);
 }
+
+.playerAnchorRight.pose-sink {
+  transform: translate(-50%, 110px);
+}
+
+/* =========================
+   LEFT PLAYER (COMPUTER)
+========================= */
+
+.playerAnchorLeft.pose-hang {
+  transform: translate(-50%, 40px);
+}
+
+.playerAnchorLeft.pose-climb {
+  transform: translate(-50%, -160px);
+}
+
+.playerAnchorLeft.pose-plank {
+  transform: translate(-50%, -185px);
+}
+
+.playerAnchorLeft.pose-sink {
+  transform: translate(-50%, 110px);
+}
+
+/* =========================
+   SUBTLE SCALE POLISH
+========================= */
+
+.playerAnchor.pose-plank .playerAvatar {
+  transform: scale(1.05);
+}
+
+.playerAnchor.pose-hang .playerAvatar {
+  transform: scale(0.95);
+}
+
+/* =========================
+   SHADOW (DEPTH)
+========================= */
+
+.playerAvatar div {
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.35));
+}
+
+/* =========================
+   METER
+========================= */
+
+.hail-meter-card {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(194, 231, 255, 0.08);
+}
+
+.hail-meter-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: rgba(236, 246, 255, 0.92);
+  font-weight: 800;
+  font-size: 0.92rem;
+  margin-bottom: 8px;
+}
+
+.hail-meter-value {
+  color: #fff3ca;
+}
+
+.hail-meter-track {
+  position: relative;
+  height: 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.18);
+}
+
+.hail-meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4db2ff 0%, #70f2ff 100%);
+  box-shadow: 0 0 16px rgba(94, 219, 255, 0.34);
+  transition: width 250ms ease;
+}
+
+.hail-meter-center {
+  position: absolute;
+  left: 50%;
+  top: -3px;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(255, 245, 205, 0.9);
+  box-shadow: 0 0 12px rgba(255, 245, 205, 0.55);
+}
+
+/* stats removed intentionally */
+.hail-stats-row,
+.hail-stat-pill {
+  display: none;
+}
+
+/* =========================
+   METER MARKER
+========================= */
 
 .marker {
   position: absolute;
-  bottom: 142px;
+  bottom: 190px;
   transform: translateX(-50%);
   width: 14px;
   height: 24px;
   border-radius: 10px;
   background: rgba(94, 219, 255, 0.95);
+  box-shadow: 0 0 18px rgba(94, 219, 255, 0.75);
   z-index: 5;
 }
 
-/* Optional if you still keep these elsewhere */
-.gameCard {
-  width: min(860px, 94vw);
-}
+/* =========================
+   RIGHT PANEL
+========================= */
 
-.questionText {
-  color: #eaf1ff;
-  font-size: 20px;
-  margin-bottom: 14px;
-}
-
-.optionGrid {
-  grid-template-columns: 1fr 1fr;
-}
-
-.meterBlock {
-  margin: 6px 0 18px;
-  color: rgba(234, 241, 255, 0.8);
-}
-
-.meterRow {
+.hail-question-panel,
+.hail-result-panel,
+.hail-loading-card {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
-  gap: 10px;
-}
-
-.meterBar {
-  margin-top: 10px;
-  height: 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
+  padding: 16px;
+  background: linear-gradient(180deg, #f8df9d 0%, #e7bb68 58%, #cf8f41 100%);
+  border: 4px solid #7c4f1d;
+  box-shadow:
+    0 16px 28px rgba(0, 0, 0, 0.22),
+    inset 0 2px 0 rgba(255, 255, 255, 0.26);
+  color: #4f2f0d;
+  position: relative;
   overflow: hidden;
 }
 
-.meterFill {
-  height: 100%;
-  background: rgba(94, 219, 255, 0.9);
-  transition: width 250ms ease;
+.hail-question-panel::before,
+.hail-result-panel::before,
+.hail-loading-card::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border-radius: 20px;
+  border: 2px dashed rgba(95, 55, 15, 0.2);
+  pointer-events: none;
 }
 
-.streakText {
-  margin-top: 10px;
+.hail-question-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.hail-question-box {
+  position: relative;
+  z-index: 1;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 249, 236, 0.72);
+  border: 2px solid rgba(141, 91, 36, 0.22);
+  min-height: 104px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.hail-question-text {
+  margin: 0;
+  width: 100%;
+  font-family: "Fredoka", sans-serif;
+  font-size: clamp(1rem, 1.25vw, 1.25rem);
+  line-height: 1.45;
+  color: #4e2d0b;
+}
+
+.hail-options-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.hail-answer-btn {
+  min-height: 54px;
+  border-radius: 18px;
+  border: 2px solid #8d5b24;
+  background: rgba(255, 248, 232, 0.86);
+  color: #5a340d;
+  font-size: 0.95rem;
+  font-weight: 900;
+  padding: 12px 14px;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease, opacity 0.16s ease;
+  box-shadow: 0 8px 14px rgba(92, 56, 18, 0.1);
+}
+
+.hail-answer-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.03);
+}
+
+.hail-answer-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.hail-side-note {
+  position: relative;
+  z-index: 1;
+  color: #6b4318;
+  font-weight: 800;
+  line-height: 1.5;
+  font-size: 0.9rem;
+  margin-top: auto;
+}
+
+.hail-panel-actions {
+  position: relative;
+  z-index: 1;
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.hail-result-title {
+  position: relative;
+  z-index: 1;
+  margin: 12px 0 8px;
+  font-family: "Fredoka", sans-serif;
+  font-size: clamp(1.8rem, 2.4vw, 2.5rem);
+  color: #4e2d0b;
+}
+
+.hail-result-copy {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 16px;
+  color: #6b4318;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.hail-score-box {
+  position: relative;
+  z-index: 1;
+  padding: 14px;
+  border-radius: 20px;
+  background: rgba(255, 248, 232, 0.76);
+  border: 2px solid rgba(141, 91, 36, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.hail-score-box span {
+  font-weight: 800;
+  color: #6f471b;
+}
+
+.hail-score-box strong {
+  font-family: "Fredoka", sans-serif;
+  font-size: 1.8rem;
+  color: #4e2d0b;
+}
+
+.hail-result-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.hail-summary-tile {
+  border-radius: 18px;
+  background: rgba(255, 248, 232, 0.72);
+  border: 2px solid rgba(141, 91, 36, 0.18);
+  padding: 12px;
+}
+
+.hail-summary-tile span {
+  display: block;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #7a5123;
+  margin-bottom: 6px;
+}
+
+.hail-summary-tile strong {
+  font-size: 1.15rem;
+  color: #4f2f0d;
+}
+
+.hail-result-actions {
+  position: relative;
+  z-index: 1;
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.loadingShell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hail-loading-card {
+  width: min(520px, 92vw);
+  min-height: 260px;
+  justify-content: center;
   text-align: center;
 }
 
-@media (max-width: 768px) {
-  .tugStage {
-    min-height: 300px;
+.hail-loading-card h2 {
+  position: relative;
+  z-index: 1;
+  margin: 14px 0 8px;
+  font-family: "Fredoka", sans-serif;
+  font-size: 2rem;
+}
+
+.hail-loading-card p {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-weight: 800;
+  color: #6b4318;
+}
+
+.errorCard {
+  min-height: 320px;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.hail-ui-btn {
+  border-radius: 18px;
+  padding: 12px 16px;
+  font-size: 0.94rem;
+  font-weight: 900;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease, filter 0.18s ease;
+  cursor: pointer;
+}
+
+.hail-ui-btn.primary {
+  border: none;
+  color: #ffffff;
+  background: linear-gradient(180deg, #31b1ff 0%, #1167c3 100%);
+  box-shadow: 0 10px 18px rgba(17, 103, 195, 0.24);
+}
+
+.hail-ui-btn.primary:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.02);
+  filter: brightness(1.04);
+}
+
+.hail-ui-btn.secondary {
+  border: 2px solid #8d5b24;
+  background: rgba(255, 248, 232, 0.75);
+  color: #5a340d;
+  box-shadow: 0 8px 12px rgba(92, 56, 18, 0.1);
+}
+
+.hail-ui-btn.secondary:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.hail-ui-btn.compact {
+  min-height: 40px;
+  padding: 10px 14px;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+@keyframes twinkle {
+  0% { opacity: 0.55; }
+  50% { opacity: 0.95; }
+  100% { opacity: 0.7; }
+}
+
+@keyframes waveMove {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(12%) translateY(8px);
+  }
+  100% {
+    transform: translateX(24%) translateY(0);
+  }
+}
+
+@keyframes waveMoveReverse {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(-10%) translateY(10px);
+  }
+  100% {
+    transform: translateX(-20%) translateY(0);
+  }
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1180px) {
+  .hail-game-layout {
+    grid-template-columns: minmax(0, 1.24fr) minmax(320px, 0.82fr);
   }
 
   .tugArena {
-    height: 270px;
+    min-height: 360px;
+  }
+}
+
+@media (max-width: 980px) {
+  .hail-game-shell {
+    padding: 10px;
+  }
+
+  .hail-game-card {
+    height: 96vh;
+    padding: 12px;
+  }
+
+  .hail-game-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .hail-game-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hail-top-actions {
+    justify-content: space-between;
+  }
+
+  .tugArena {
+    min-height: 330px;
   }
 
   .plankImg {
-    width: 280px;
-    bottom: 62px;
+    bottom: 76px;
+  }
+
+  .marker {
+    bottom: 146px;
+  }
+}
+
+@media (max-width: 680px) {
+  .hail-game-card {
+    height: 96vh;
+    border-radius: 24px;
+    padding: 10px;
+  }
+
+  .hail-stage-card,
+  .hail-question-panel,
+  .hail-result-panel {
+    border-radius: 22px;
+    padding: 12px;
+  }
+
+  .hail-game-title {
+    font-size: 1.55rem;
+  }
+
+  .hail-question-box {
+    min-height: 94px;
+    padding: 14px;
+  }
+
+  .hail-question-text {
+    font-size: 0.98rem;
+  }
+
+  .hail-result-grid,
+  .hail-result-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .tugArena {
+    min-height: 285px;
+  }
+
+  .plankImg {
+    width: 270px;
+    bottom: 56px;
   }
 
   .playerAnchor {
-    left: calc(50% + 85px);
     width: 200px;
     height: 200px;
-    bottom: 4px;
+    bottom: 50px;
   }
 
   .playerAvatar {
@@ -158,27 +909,47 @@
     height: 200px;
   }
 
-  .pose-hang {
-    transform: translate(-50%, 48px);
+  .playerAnchorLeft {
+    left: calc(70% - 112px);
   }
 
-  .pose-climb {
-    transform: translate(-50%, -85px);
+  .playerAnchorRight {
+    left: calc(70% + 112px);
   }
 
-  .pose-plank {
-    transform: translate(-50%, -45px);
+  .playerAnchorRight.pose-hang {
+    transform: translate(-50%, 34px);
   }
 
-  .pose-sink {
-    transform: translate(-50%, 95px);
+  .playerAnchorRight.pose-climb {
+    transform: translate(-50%, -92px);
+  }
+
+  .playerAnchorRight.pose-plank {
+    transform: translate(-50%, -104px);
+  }
+
+  .playerAnchorRight.pose-sink {
+    transform: translate(-50%, 94px);
+  }
+
+  .playerAnchorLeft.pose-hang {
+    transform: translate(-50%, 34px);
+  }
+
+  .playerAnchorLeft.pose-climb {
+    transform: translate(-50%, -92px);
+  }
+
+  .playerAnchorLeft.pose-plank {
+    transform: translate(-50%, -104px);
+  }
+
+  .playerAnchorLeft.pose-sink {
+    transform: translate(-50%, 94px);
   }
 
   .marker {
-    bottom: 125px;
-  }
-
-  .optionGrid {
-    grid-template-columns: 1fr;
+    bottom: 116px;
   }
 }

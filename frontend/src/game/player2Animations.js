@@ -1,4 +1,4 @@
-export const PLAYER1_ANIMS = {
+export const PLAYER2_ANIMS = {
   HANG_IDLE: { start: 0, end: 2, loop: true, fps: 6 },
   PLANK_IDLE: { start: 4, end: 6, loop: true, fps: 6 },
   HYPE_IDLE: { start: 7, end: 10, loop: true, fps: 8 },

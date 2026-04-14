@@ -4,41 +4,38 @@ import axios from "axios";
 import "../styles/scene.css";
 import "../styles/game.css";
 import Player1Sprite from "../components/Player1Sprite";
+import Player2Sprite from "../components/Player2Sprite";
 import plankImg from "../assets/scene/plank.png";
 
 export default function Game() {
   const navigate = useNavigate();
 
-  // Main game progress values
   const [meter, setMeter] = useState(0);
   const [streak, setStreak] = useState(0);
   const [status, setStatus] = useState("playing");
 
-  // Store the current set of questions and the current question index
   const [questions, setQuestions] = useState([]);
   const [idx, setIdx] = useState(0);
 
-  // General page and button states
   const [pageLoading, setPageLoading] = useState(true);
   const [locked, setLocked] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
 
-  // Track final result data for the leaderboard
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
   const [resultSaved, setResultSaved] = useState(false);
 
-  // Control the player animation and pose
   const [p1Anim, setP1Anim] = useState("HANG_IDLE");
-  const [p1Pose, setP1Pose] = useState("HANG"); // HANG | CLIMB | PLANK | SINK
+  const [p1Pose, setP1Pose] = useState("HANG");
 
-  // Refs used to avoid repeated loading and to compare previous meter values
+  const [p2Anim, setP2Anim] = useState("HANG_IDLE");
+  const [p2Pose, setP2Pose] = useState("HANG");
+
   const isLoadingRef = useRef(false);
   const prevMeterRef = useRef(0);
 
-  // Calculate the final score using result, answers, streak, and meter position
   const calculateFinalScore = () => {
     return (
       (status === "win" ? 100 : 25) +
@@ -48,12 +45,10 @@ export default function Game() {
     );
   };
 
-  // If the user is not authenticated, send them back to login
   const handleUnauthorized = () => {
     navigate("/login", { replace: true });
   };
 
-  // Log out the current user and return to the login page
   const handleLogout = async () => {
     try {
       setLoggingOut(true);
@@ -71,7 +66,6 @@ export default function Game() {
     }
   };
 
-  // Load a new set of questions from the backend
   const loadQuestions = async () => {
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
@@ -80,7 +74,6 @@ export default function Game() {
       setPageLoading(true);
       setLoadError("");
 
-      // First check whether the user is still logged in
       const authRes = await axios.get("http://localhost:3001/me", {
         withCredentials: true,
       });
@@ -90,10 +83,12 @@ export default function Game() {
         return;
       }
 
-      // Request quiz questions from the backend
-      const res = await axios.get("http://localhost:3001/game/questions?amount=5", {
-        withCredentials: true,
-      });
+      const res = await axios.get(
+        "http://localhost:3001/game/questions?amount=5",
+        {
+          withCredentials: true,
+        }
+      );
 
       if (!Array.isArray(res.data?.questions) || res.data.questions.length === 0) {
         throw new Error("Backend returned no questions");
@@ -122,19 +117,16 @@ export default function Game() {
     }
   };
 
-  // Load questions when the game page first opens
   useEffect(() => {
     loadQuestions();
   }, []);
 
-  // Update win/lose/playing state based on the meter value
   useEffect(() => {
     if (meter >= 4) setStatus("win");
     else if (meter <= -4) setStatus("lose");
     else setStatus("playing");
   }, [meter]);
 
-  // Change the player pose and animation depending on game progress
   useEffect(() => {
     const prevMeter = prevMeterRef.current;
     const currMeter = meter;
@@ -143,44 +135,58 @@ export default function Game() {
     if (status === "win") {
       setP1Pose("PLANK");
       setP1Anim("BACKFLIP_WIN");
+
+      setP2Pose("SINK");
+      setP2Anim("LOSE_SINK");
       return;
     }
 
     if (status === "lose") {
       setP1Pose("SINK");
       setP1Anim("LOSE_SINK");
+
+      setP2Pose("PLANK");
+      setP2Anim("BACKFLIP_WIN");
       return;
     }
 
-    // Move from hanging to climbing when the player gains enough progress
     if (prevMeter <= 0 && currMeter >= 1) {
       setP1Pose("CLIMB");
       setP1Anim("CLIMB_UP");
-      return;
-    }
-
-    // Move back to hanging if progress drops again
-    if (prevMeter >= 1 && currMeter <= 0) {
+    } else if (prevMeter >= 1 && currMeter <= 0) {
       setP1Pose("HANG");
       setP1Anim(currMeter < 0 ? "PANIC_HANG_IDLE" : "HANG_IDLE");
-      return;
-    }
-
-    // When the player is ahead, stay on the plank
-    if (currMeter >= 1) {
+    } else if (currMeter >= 1) {
       setP1Pose("PLANK");
-      if (streak >= 2) setP1Anim("HYPE_IDLE");
-      else setP1Anim("PLANK_IDLE");
+      setP1Anim(streak >= 2 ? "HYPE_IDLE" : "PLANK_IDLE");
+    } else {
+      setP1Pose("HANG");
+      setP1Anim(currMeter < 0 ? "PANIC_HANG_IDLE" : "HANG_IDLE");
+    }
+
+    if (prevMeter >= 0 && currMeter <= -1) {
+      setP2Pose("CLIMB");
+      setP2Anim("CLIMB_UP");
       return;
     }
 
-    // Default hanging states
-    setP1Pose("HANG");
-    if (currMeter < 0) setP1Anim("PANIC_HANG_IDLE");
-    else setP1Anim("HANG_IDLE");
+    if (prevMeter <= -1 && currMeter >= 0) {
+      setP2Pose("HANG");
+      setP2Anim(currMeter > 0 ? "PANIC_HANG_IDLE" : "HANG_IDLE");
+      return;
+    }
+
+    if (currMeter <= -1) {
+      setP2Pose("PLANK");
+      setP2Anim("HYPE_IDLE");
+      return;
+    }
+
+    setP2Pose("HANG");
+    if (currMeter > 0) setP2Anim("PANIC_HANG_IDLE");
+    else setP2Anim("HANG_IDLE");
   }, [meter, streak, status]);
 
-  // Save the result to the leaderboard once the game ends
   useEffect(() => {
     const saveResult = async () => {
       if ((status !== "win" && status !== "lose") || resultSaved) return;
@@ -212,13 +218,6 @@ export default function Game() {
     saveResult();
   }, [status, resultSaved, correctAnswers, wrongAnswers, bestStreak, meter]);
 
-  // Random computer pull after a wrong answer
-  const computerPull = () => {
-    const cpuPulls = Math.random() < 0.35;
-    if (cpuPulls) setMeter((m) => m - 1);
-  };
-
-  // Move to the next question, or reload questions if the set is finished
   const nextQuestion = async () => {
     if (status !== "playing") return;
 
@@ -230,7 +229,6 @@ export default function Game() {
     setIdx((prev) => prev + 1);
   };
 
-  // Check the selected answer and update the game state
   const submitAnswer = (choice) => {
     if (status !== "playing" || locked) return;
 
@@ -254,7 +252,6 @@ export default function Game() {
         return newStreak;
       });
 
-      // Play a short pull animation if the player is already on the plank side
       if (prev >= 1 && status === "playing") {
         setP1Anim("MINI_PULL");
       }
@@ -269,14 +266,12 @@ export default function Game() {
       setStreak(0);
 
       setTimeout(async () => {
-        computerPull();
         await nextQuestion();
         setLocked(false);
       }, 650);
     }
   };
 
-  // Reset everything and start again with a new set of questions
   const resetGame = async () => {
     setMeter(0);
     setStreak(0);
@@ -290,12 +285,15 @@ export default function Game() {
 
     setP1Anim("HANG_IDLE");
     setP1Pose("HANG");
+
+    setP2Anim("HANG_IDLE");
+    setP2Pose("HANG");
+
     prevMeterRef.current = 0;
 
     await loadQuestions();
   };
 
-  // Decide what animation should play next after one finishes
   const handleP1AnimDone = (finishedAnim) => {
     if (status === "win") return;
 
@@ -317,12 +315,40 @@ export default function Game() {
       return;
     }
 
+    if (finishedAnim === "BACKFLIP_WIN") {
+      setP1Pose("PLANK");
+      setP1Anim("HYPE_IDLE");
+      return;
+    }
+
     if (finishedAnim === "LOSE_SINK") {
       setP1Anim("UNDERWATER_DRIFT");
     }
   };
 
-  // Control playback speed for each animation
+  const handleP2AnimDone = (finishedAnim) => {
+    if (status === "win") {
+      setP2Anim("UNDERWATER_DRIFT");
+      return;
+    }
+
+    if (finishedAnim === "CLIMB_UP") {
+      setP2Pose("PLANK");
+      setP2Anim("HYPE_IDLE");
+      return;
+    }
+
+    if (finishedAnim === "BACKFLIP_WIN") {
+      setP2Pose("PLANK");
+      setP2Anim("HYPE_IDLE");
+      return;
+    }
+
+    if (finishedAnim === "LOSE_SINK") {
+      setP2Anim("UNDERWATER_DRIFT");
+    }
+  };
+
   const getP1Speed = () => {
     if (p1Anim === "CLIMB_UP") return 0.28;
     if (p1Anim === "BACKFLIP_WIN") return 0.5;
@@ -330,66 +356,79 @@ export default function Game() {
     return 0.65;
   };
 
-  // Loading screen shown while questions are being fetched
+  const getP2Speed = () => {
+    if (p2Anim === "CLIMB_UP") return 0.28;
+    if (p2Anim === "BACKFLIP_WIN") return 0.5;
+    if (p2Anim === "MINI_PULL") return 0.5;
+    return 0.65;
+  };
+
   if (pageLoading) {
     return (
-      <div className="scene">
-        <video className="bgVideo" autoPlay loop muted playsInline>
-          <source src="/videos/dashboard.mp4" type="video/mp4" />
-        </video>
-        <div className="ui">
-          <div className="card">
-            <h2 className="title" style={{ fontSize: 32 }}>
-              Loading Questions...
-            </h2>
+      <div className="scene hail-game-page">
+        <div className="hail-game-overlay" />
+        <div className="hail-stars layer" />
+        <div className="hail-moon-glow layer" />
+        <div className="hail-moon layer" />
+        <div className="hail-cloud hail-cloud-1 layer" />
+        <div className="hail-cloud hail-cloud-2 layer" />
+        <div className="hail-cloud hail-cloud-3 layer" />
+        <div className="hail-snow layer">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <span key={i} className={`snowflake snowflake-${i + 1}`}>✦</span>
+          ))}
+        </div>
+        <div className="hail-wave hail-wave-back layer" />
+        <div className="hail-wave hail-wave-mid layer" />
+        <div className="hail-wave hail-wave-front layer" />
+
+        <div className="hail-game-shell loadingShell">
+          <div className="hail-loading-card">
+            <div className="hail-mini-badge">Preparing Voyage</div>
+            <h2>Loading Questions...</h2>
+            <p>The sea is getting ready for your next round.</p>
           </div>
         </div>
       </div>
     );
   }
 
-  // Error screen shown if questions could not be loaded
   if (!questions.length) {
     return (
-      <div className="scene">
-        <video className="bgVideo" autoPlay loop muted playsInline>
-          <source src="/videos/dashboard.mp4" type="video/mp4" />
-        </video>
-        <div className="ui">
-          <div className="card">
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "12px",
-              }}
-            >
-              <h2 className="title" style={{ margin: 0 }}>
-                Failed to Load Questions
-              </h2>
+      <div className="scene hail-game-page">
+        <div className="hail-game-overlay" />
+        <div className="hail-stars layer" />
+        <div className="hail-moon-glow layer" />
+        <div className="hail-moon layer" />
+        <div className="hail-cloud hail-cloud-1 layer" />
+        <div className="hail-cloud hail-cloud-2 layer" />
+        <div className="hail-cloud hail-cloud-3 layer" />
+        <div className="hail-wave hail-wave-back layer" />
+        <div className="hail-wave hail-wave-mid layer" />
+        <div className="hail-wave hail-wave-front layer" />
+
+        <div className="hail-game-shell loadingShell">
+          <div className="hail-loading-card errorCard">
+            <div className="hail-mini-badge">Voyage Interrupted</div>
+            <h2>Failed to Load Questions</h2>
+            <p>{loadError || "Unknown error"}</p>
+
+            <div className="hail-result-actions">
+              <button className="hail-ui-btn primary" onClick={loadQuestions}>
+                Retry
+              </button>
               <button
-                className="smallBtn"
+                className="hail-ui-btn secondary"
+                onClick={() => navigate("/dashboard")}
+              >
+                Back
+              </button>
+              <button
+                className="hail-ui-btn secondary"
                 onClick={handleLogout}
                 disabled={loggingOut}
               >
                 {loggingOut ? "Logging out..." : "Logout"}
-              </button>
-            </div>
-
-            <p className="subtitle" style={{ opacity: 0.85 }}>
-              {loadError || "Unknown error"}
-            </p>
-
-            <div className="rowBtns" style={{ marginTop: 14 }}>
-              <button className="smallBtn" onClick={loadQuestions}>
-                Retry
-              </button>
-              <button
-                className="smallBtn"
-                onClick={() => navigate("/dashboard")}
-              >
-                Back
               </button>
             </div>
           </div>
@@ -399,159 +438,248 @@ export default function Game() {
   }
 
   const current = questions[idx];
+  const progressPercent = Math.max(0, Math.min(100, ((meter + 4) / 8) * 100));
 
   return (
-    <div className="scene">
-      <video className="bgVideo" autoPlay loop muted playsInline>
-        <source src="/videos/dashboard.mp4" type="video/mp4" />
-      </video>
+    <div className="scene hail-game-page">
+      <div className="hail-game-overlay" />
+      <div className="hail-stars layer" />
+      <div className="hail-moon-glow layer" />
+      <div className="hail-moon layer" />
+      <div className="hail-cloud hail-cloud-1 layer" />
+      <div className="hail-cloud hail-cloud-2 layer" />
+      <div className="hail-cloud hail-cloud-3 layer" />
 
-      <div className="ui">
-        <div className="card gameCard">
-          {/* Logout button in the top corner */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginBottom: "10px",
-            }}
-          >
-            <button
-              className="smallBtn"
-              onClick={handleLogout}
-              disabled={loggingOut}
-            >
-              {loggingOut ? "Logging out..." : "Logout"}
-            </button>
-          </div>
+      <div className="hail-snow layer">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <span key={i} className={`snowflake snowflake-${i + 1}`}>✦</span>
+        ))}
+      </div>
 
-          {/* Game title and category */}
-          <div className="gameHeader">
-            <h2 className="title gameTitle">Tug-of-War Quiz</h2>
-            <div className="miniInfo">
-              <span className="pill">Easy</span>
-              <span className="pill">{current.category}</span>
+      <div className="hail-sparkles layer">
+        <span className="spark spark-1" />
+        <span className="spark spark-2" />
+        <span className="spark spark-3" />
+        <span className="spark spark-4" />
+        <span className="spark spark-5" />
+      </div>
+
+      <div className="hail-wave hail-wave-back layer" />
+      <div className="hail-wave hail-wave-mid layer" />
+      <div className="hail-wave hail-wave-front layer" />
+
+      <div className="hail-game-shell">
+        <section className="hail-game-card">
+          <header className="hail-game-topbar">
+            <div className="hail-brand-block">
+              <div className="hail-game-kicker">Frozen Duel</div>
+              <h1 className="hail-game-title">Tug of War Quiz</h1>
             </div>
-          </div>
 
-          {/* Tug-of-war play area */}
-          <div className="tugStage">
-            <div className="tugArena">
-              <img
-                src={plankImg}
-                alt="plank"
-                className="plankImg"
-                style={{
-                  transform: `translateX(calc(-50% + ${meter * 8}px)) rotate(${meter * 1.5}deg)`,
-                }}
-              />
+            <div className="hail-top-actions">
+              <div className="hail-status-chip">
+                <span className="status-dot" />
+                {status === "playing"
+                  ? "Battle Active"
+                  : status === "win"
+                  ? "Victory"
+                  : "Defeat"}
+              </div>
 
-              <div
-                className="marker"
-                style={{ left: `calc(50% + ${meter * 18}px)` }}
-              />
-
-              <div
-                className={`playerAnchor pose-${p1Pose.toLowerCase()} ${
-                  status === "lose" ? "playerFadeOut" : ""
-                }`}
+              <button
+                className="hail-ui-btn secondary compact"
+                onClick={handleLogout}
+                disabled={loggingOut}
               >
-                <div className="playerAvatar">
-                  <Player1Sprite
-                    anim={p1Anim}
-                    speed={getP1Speed()}
-                    onDone={handleP1AnimDone}
-                  />
+                {loggingOut ? "Logging out..." : "Logout"}
+              </button>
+            </div>
+          </header>
+
+          <div className="hail-game-layout">
+            <section className="hail-left-panel">
+              <div className="hail-stage-card">
+                <div className="hail-stage-header">
+                  <div className="hail-stage-label">The Frozen Deck</div>
+                  <div className="hail-category-pill">{current.category}</div>
+                </div>
+
+                <div className="tugStage">
+                  <div className="tugArena">
+                    <div className="hail-stage-glow" />
+
+                    <img
+                      src={plankImg}
+                      alt="plank"
+                      className="plankImg"
+                      style={{
+                        transform: `translateX(calc(-50% + ${meter * 8}px)) rotate(${meter * 1.5}deg)`,
+                      }}
+                    />
+
+                    
+
+                    <div
+                      className={`playerAnchor playerAnchorLeft pose-${p2Pose.toLowerCase()} ${
+                        status === "win" ? "playerFadeOut" : ""
+                      }`}
+                    >
+                      <div className="playerAvatar playerAvatarLeft">
+                        <Player2Sprite
+                          anim={p2Anim}
+                          speed={getP2Speed()}
+                          onDone={handleP2AnimDone}
+                        />
+                      </div>
+                    </div>
+
+                    <div
+                      className={`playerAnchor playerAnchorRight pose-${p1Pose.toLowerCase()} ${
+                        status === "lose" ? "playerFadeOut" : ""
+                      }`}
+                    >
+                      <div className="playerAvatar">
+                        <Player1Sprite
+                          anim={p1Anim}
+                          speed={getP1Speed()}
+                          onDone={handleP1AnimDone}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="hail-meter-card">
+                  <div className="hail-meter-header">
+                    <span>Computer</span>
+                    <span className="hail-meter-value">Meter {meter}</span>
+                    <span>You</span>
+                  </div>
+
+                  <div className="hail-meter-track">
+                    <div
+                      className="hail-meter-fill"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                    <div className="hail-meter-center" />
+                  </div>
+
+                  <div className="hail-stats-row">
+                    <div className="hail-stat-pill">
+                      <span>Streak</span>
+                      <strong>{streak}</strong>
+                    </div>
+                    <div className="hail-stat-pill">
+                      <span>Correct</span>
+                      <strong>{correctAnswers}</strong>
+                    </div>
+                    <div className="hail-stat-pill">
+                      <span>Wrong</span>
+                      <strong>{wrongAnswers}</strong>
+                    </div>
+                    <div className="hail-stat-pill">
+                      <span>Best</span>
+                      <strong>{bestStreak}</strong>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            </section>
+
+            <section className="hail-right-panel">
+              {status !== "playing" ? (
+                <div className="hail-result-panel">
+                  <div className="hail-mini-badge">
+                    {status === "win" ? "Glorious Finish" : "Storm Took Over"}
+                  </div>
+
+                  <h2 className="hail-result-title">
+                    {status === "win" ? "You Win" : "You Lose"}
+                  </h2>
+
+                  <p className="hail-result-copy">
+                    {status === "win"
+                      ? "You conquered the icy duel and claimed the final plank."
+                      : "The frozen sea won this round, but the next voyage is yours to take."}
+                  </p>
+
+                  <div className="hail-score-box">
+                    <span>Final Score</span>
+                    <strong>{calculateFinalScore()}</strong>
+                  </div>
+
+                  <div className="hail-result-grid">
+                    <div className="hail-summary-tile">
+                      <span>Correct</span>
+                      <strong>{correctAnswers}</strong>
+                    </div>
+                    <div className="hail-summary-tile">
+                      <span>Wrong</span>
+                      <strong>{wrongAnswers}</strong>
+                    </div>
+                    <div className="hail-summary-tile">
+                      <span>Best Streak</span>
+                      <strong>{bestStreak}</strong>
+                    </div>
+                    <div className="hail-summary-tile">
+                      <span>Final Meter</span>
+                      <strong>{meter}</strong>
+                    </div>
+                  </div>
+
+                  <div className="hail-result-actions">
+                    <button className="hail-ui-btn primary" onClick={resetGame}>
+                      Play Again
+                    </button>
+                    <button
+                      className="hail-ui-btn secondary"
+                      onClick={() => navigate("/dashboard")}
+                    >
+                      Back to Dashboard
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="hail-question-panel">
+                  <div className="hail-question-top">
+                    <div className="hail-mini-badge">Question {idx + 1}</div>
+                    <div className="hail-easy-pill">Easy Voyage</div>
+                  </div>
+
+                  <div className="hail-question-box">
+                    <p className="hail-question-text">{current.question}</p>
+                  </div>
+
+                  <div className="hail-options-grid">
+                    {current.options.map((opt) => (
+                      <button
+                        key={opt}
+                        className="hail-answer-btn"
+                        onClick={() => submitAnswer(opt)}
+                        disabled={locked}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="hail-side-note">
+                    Choose wisely. Each answer shifts the balance across the freezing sea.
+                  </div>
+
+                  <div className="hail-panel-actions">
+                    <button
+                      className="hail-ui-btn secondary"
+                      onClick={() => navigate("/dashboard")}
+                    >
+                      Quit
+                    </button>
+                  </div>
+                </div>
+              )}
+            </section>
           </div>
-
-          {/* Meter and streak display */}
-          <div className="meterBlock">
-            <div className="meterRow">
-              <span>Computer</span>
-              <span>Meter: {meter}</span>
-              <span>You</span>
-            </div>
-
-            <div className="meterBar">
-              <div
-                className="meterFill"
-                style={{ width: `${((meter + 4) / 8) * 100}%` }}
-              />
-            </div>
-
-            <div className="streakText">
-              Streak: <strong>{streak}</strong>
-            </div>
-          </div>
-
-          {status !== "playing" ? (
-            <div className="resultBox">
-              {/* Final result shown when the game ends */}
-              <h3 className="resultTitle">
-                {status === "win" ? "You Win" : "You Lose"}
-              </h3>
-
-              <p style={{ marginTop: 8 }}>
-                Score: <strong>{calculateFinalScore()}</strong>
-              </p>
-              <p>
-                Correct: <strong>{correctAnswers}</strong> | Wrong:{" "}
-                <strong>{wrongAnswers}</strong>
-              </p>
-              <p>
-                Best Streak: <strong>{bestStreak}</strong>
-              </p>
-
-              <div className="rowBtns" style={{ marginTop: 14 }}>
-                <button className="smallBtn" onClick={resetGame}>
-                  Play Again (New Questions)
-                </button>
-                <button
-                  className="smallBtn"
-                  onClick={() => navigate("/dashboard")}
-                >
-                  Back to Dashboard
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* Current question and answer options */}
-              <div className="questionText">{current.question}</div>
-
-              <div className="rowBtns optionGrid">
-                {current.options.map((opt) => (
-                  <button
-                    key={opt}
-                    className="smallBtn"
-                    onClick={() => submitAnswer(opt)}
-                    disabled={locked}
-                    style={
-                      locked
-                        ? { opacity: 0.6, cursor: "not-allowed" }
-                        : undefined
-                    }
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-
-              {/* Quit button */}
-              <div style={{ marginTop: 16, textAlign: "center" }}>
-                <button
-                  className="smallBtn"
-                  onClick={() => navigate("/dashboard")}
-                >
-                  Quit
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+        </section>
       </div>
     </div>
   );
