@@ -1,3 +1,9 @@
+/*
+Parts of this file were developed with assistance from ChatGPT (OpenAI), April 2026.
+The suggestions were reviewed, understood, modified, tested, and integrated into this project by me.
+This includes support with backend structure, authentication/session handling, API integration, and leaderboard-related logic.
+*/
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -29,6 +35,9 @@ app.use(
   })
 );
 
+// Configure session storage in MongoDB so login state can persist across requests
+// The session setup below was developed with assistance from ChatGPT (OpenAI), April 2026.
+// I reviewed, understood, adapted, and integrated it into this project.
 app.use(
   session({
     name: "quiz.sid",
@@ -41,9 +50,9 @@ app.use(
     }),
     cookie: {
       httpOnly: true,
-      secure: false, // set true only when using HTTPS
+      secure: false,
       sameSite: "lax",
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      maxAge: 1000 * 60 * 60 * 24,
     },
   })
 );
@@ -51,6 +60,7 @@ app.use(
 // =========================
 // Database
 // =========================
+// Connect to the local MongoDB database before handling application data
 mongoose
   .connect(MONGO_URI)
   .then(() => console.log("MongoDB connected locally ✅"))
@@ -64,6 +74,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()[\]{}\-_=+\\|;:'",.<>/?`~]).{8,}$/;
 
+// Validate user input before creating a new account
 function validateRegisterInput(name, email, password) {
   if (!name || !name.trim()) {
     return "Name is required";
@@ -84,6 +95,7 @@ function validateRegisterInput(name, email, password) {
   return null;
 }
 
+// Protect routes that should only be accessible to logged-in users
 function requireAuth(req, res, next) {
   if (!req.session || !req.session.userId) {
     return res.status(401).json({ message: "Unauthorized" });
@@ -91,11 +103,25 @@ function requireAuth(req, res, next) {
   next();
 }
 
+// Randomize answer order before sending quiz options to the frontend
+function shuffleArray(items) {
+  const arr = [...items];
+
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+
+  return arr;
+}
+
 // =========================
 // Auth Routes
 // =========================
 
 // Register
+// The registration logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+// I reviewed, understood, modified, and integrated it into this project.
 app.post("/register", async (req, res) => {
   try {
     const name = req.body.name?.trim();
@@ -112,6 +138,7 @@ app.post("/register", async (req, res) => {
       return res.status(409).json({ message: "Email already registered" });
     }
 
+    // Hash the password before storing it in the database
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const player = await PlayerModel.create({
@@ -137,6 +164,8 @@ app.post("/register", async (req, res) => {
 });
 
 // Login
+// The login and session creation logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+// I reviewed, understood, adapted, and integrated it into this project.
 app.post("/login", async (req, res) => {
   try {
     const email = req.body.email?.trim().toLowerCase();
@@ -153,11 +182,13 @@ app.post("/login", async (req, res) => {
       return res.status(404).json({ message: "No record existed" });
     }
 
+    // Compare entered password with the stored hashed password
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return res.status(401).json({ message: "Password incorrect" });
     }
 
+    // Store key user details in the session after successful login
     req.session.userId = user._id.toString();
     req.session.userName = user.name;
     req.session.userEmail = user.email;
@@ -179,6 +210,7 @@ app.post("/login", async (req, res) => {
 });
 
 // Logout
+// Destroy the session and clear the cookie when the user logs out
 app.post("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -191,6 +223,7 @@ app.post("/logout", (req, res) => {
 });
 
 // Current logged-in user
+// Return the current authenticated user from the session
 app.get("/me", (req, res) => {
   if (!req.session || !req.session.userId) {
     return res.status(401).json({ message: "Not logged in" });
@@ -217,43 +250,55 @@ app.get("/protected", requireAuth, (req, res) => {
 // =========================
 // Trivia API Helpers
 // =========================
+
+// Fetch external trivia data with a timeout to avoid hanging requests
+// The external API request handling below was developed with assistance from ChatGPT (OpenAI), April 2026.
+// I reviewed, understood, modified, and integrated it into this project.
 async function fetchWithTimeout(url, timeoutMs = 8000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const res = await fetch(url, { signal: controller.signal });
+    const res = await fetch(url, {
+      method: "GET",
+      signal: controller.signal,
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
     return res;
   } finally {
     clearTimeout(timer);
   }
 }
 
-async function fetchOpenTdbWithRetry(url, retries = 3) {
+// Retry failed API requests a few times before returning an error
+async function fetchTriviaApiWithRetry(url, retries = 3) {
   let lastErr;
 
-  for (let attempt = 1; attempt <= retries; attempt++) {
+  for (let attempt = 1; attempt <= retries; attempt += 1) {
     try {
       const response = await fetchWithTimeout(url, 8000);
 
       if (!response.ok) {
-        throw new Error(`OpenTDB HTTP ${response.status}`);
+        throw new Error(`The Trivia API HTTP ${response.status}`);
       }
 
       const data = await response.json();
 
-      if (!data || !Array.isArray(data.results)) {
-        throw new Error("OpenTDB returned invalid format");
+      if (!Array.isArray(data)) {
+        throw new Error("The Trivia API returned invalid format");
       }
 
-      if (data.results.length === 0) {
-        throw new Error("OpenTDB returned empty results");
+      if (data.length === 0) {
+        throw new Error("The Trivia API returned empty results");
       }
 
       return data;
     } catch (err) {
       lastErr = err;
-      console.warn(`OpenTDB attempt ${attempt} failed: ${err.message}`);
+      console.warn(`The Trivia API attempt ${attempt} failed: ${err.message}`);
     }
   }
 
@@ -263,34 +308,47 @@ async function fetchOpenTdbWithRetry(url, retries = 3) {
 // =========================
 // Questions Route
 // =========================
+
+// Fetch quiz questions from the external trivia service and prepare them for the game
+// The question fetching and formatting logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+// I reviewed, understood, adapted, and integrated it into this project.
 app.get("/game/questions", requireAuth, async (req, res) => {
   try {
     const amount = Number(req.query.amount || 5);
-    const safeAmount = Number.isNaN(amount) ? 5 : Math.min(Math.max(amount, 1), 10);
+    const safeAmount = Number.isNaN(amount)
+      ? 5
+      : Math.min(Math.max(amount, 1), 10);
 
-    const url = `https://opentdb.com/api.php?amount=${safeAmount}&type=multiple&difficulty=easy`;
+    const url =
+      `https://the-trivia-api.com/v2/questions` +
+      `?limit=${safeAmount}` +
+      `&difficulties=easy`;
 
-    const data = await fetchOpenTdbWithRetry(url, 3);
+    const data = await fetchTriviaApiWithRetry(url, 3);
 
-    const decode = (s = "") =>
-      s
-        .replace(/&quot;/g, '"')
-        .replace(/&#039;/g, "'")
-        .replace(/&amp;/g, "&")
-        .replace(/&lt;/g, "<")
-        .replace(/&gt;/g, ">");
+    const questions = data.map((q) => {
+      const correctAnswer = String(q.correctAnswer || "").trim();
+      const incorrectAnswers = Array.isArray(q.incorrectAnswers)
+        ? q.incorrectAnswers.map((item) => String(item).trim())
+        : [];
 
-    const questions = data.results.map((q) => {
-      const options = [...q.incorrect_answers, q.correct_answer]
-        .map(decode)
-        .sort(() => Math.random() - 0.5);
+      const options = shuffleArray([correctAnswer, ...incorrectAnswers]);
+
+      const rawCategory = String(q.category || "")
+        .replace(/_/g, " ")
+        .trim();
+
+      const category =
+        rawCategory.charAt(0).toUpperCase() + rawCategory.slice(1);
+
+      const difficulty = String(q.difficulty || "easy").trim();
 
       return {
-        question: decode(q.question),
+        question: String(q.question?.text || "").trim(),
         options,
-        answer: decode(q.correct_answer),
-        category: decode(q.category),
-        difficulty: decode(q.difficulty),
+        answer: correctAnswer,
+        category: category || "General Knowledge",
+        difficulty,
       };
     });
 
@@ -298,7 +356,7 @@ app.get("/game/questions", requireAuth, async (req, res) => {
   } catch (err) {
     console.error("GAME QUESTIONS FINAL FAIL:", err.message);
     return res.status(502).json({
-      message: "Question service unavailable (OpenTDB)",
+      message: "Question service unavailable (The Trivia API)",
       error: err.message,
     });
   }
@@ -309,6 +367,8 @@ app.get("/game/questions", requireAuth, async (req, res) => {
 // =========================
 
 // Save completed game
+// The leaderboard persistence logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+// I reviewed, understood, modified, and integrated it into this project.
 app.post("/leaderboard/save", requireAuth, async (req, res) => {
   try {
     const {
@@ -349,6 +409,7 @@ app.post("/leaderboard/save", requireAuth, async (req, res) => {
 });
 
 // Overall player leaderboard
+// Aggregate player performance across all saved matches
 app.get("/leaderboard/players", requireAuth, async (req, res) => {
   try {
     const leaderboard = await GameResultModel.aggregate([
@@ -422,6 +483,7 @@ app.get("/leaderboard/players", requireAuth, async (req, res) => {
 });
 
 // Top match sessions
+// Return the highest scoring individual game sessions
 app.get("/leaderboard/sessions", requireAuth, async (req, res) => {
   try {
     const sessions = await GameResultModel.find({})
@@ -438,6 +500,7 @@ app.get("/leaderboard/sessions", requireAuth, async (req, res) => {
 });
 
 // Summary stats
+// Return overall statistics for the leaderboard dashboard
 app.get("/leaderboard/summary", requireAuth, async (req, res) => {
   try {
     const totalPlayers = await GameResultModel.distinct("playerId");
@@ -476,6 +539,7 @@ app.get("/leaderboard/summary", requireAuth, async (req, res) => {
 // =========================
 // Start Server
 // =========================
+// Start the Express server on the configured port
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT} ✅`);
 });

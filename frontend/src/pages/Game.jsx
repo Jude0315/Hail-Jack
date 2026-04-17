@@ -1,3 +1,9 @@
+/*
+Parts of this file were developed with assistance from ChatGPT (OpenAI), April 2026.
+The suggestions were reviewed, understood, modified, tested, and integrated into this project by me.
+This includes support with game-state handling, API integration, animation flow, audio controls, and result-saving logic.
+*/
+
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -10,41 +16,51 @@ import plankImg from "../assets/scene/plank.png";
 export default function Game() {
   const navigate = useNavigate();
 
+  // Core game state used to control balance, streaks, and win/lose status
   const [meter, setMeter] = useState(0);
   const [streak, setStreak] = useState(0);
   const [status, setStatus] = useState("playing");
 
+  // Question data and current question index
   const [questions, setQuestions] = useState([]);
   const [idx, setIdx] = useState(0);
 
+  // Loading, error, and logout state for the page
   const [pageLoading, setPageLoading] = useState(true);
   const [locked, setLocked] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
 
+  // Track game performance for leaderboard saving
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
   const [resultSaved, setResultSaved] = useState(false);
 
+  // Animation and pose state for Player 1
   const [p1Anim, setP1Anim] = useState("HANG_IDLE");
   const [p1Pose, setP1Pose] = useState("HANG");
 
+  // Animation and pose state for Player 2
   const [p2Anim, setP2Anim] = useState("HANG_IDLE");
   const [p2Pose, setP2Pose] = useState("HANG");
 
+  // Audio state
   const [muted, setMuted] = useState(true);
   const [audioStarted, setAudioStarted] = useState(false);
 
+  // Audio references
   const audioRef = useRef(null);
   const clickAudioRef = useRef(null);
   const startAudioRef = useRef(null);
   const menuAudioRef = useRef(null);
   const errorAudioRef = useRef(null);
 
+  // References used to prevent duplicate loading and track previous meter position
   const isLoadingRef = useRef(false);
   const prevMeterRef = useRef(0);
 
+  // Navigate after playing a UI sound for smoother interaction
   const navigateTo = (path, sound = "menu") => {
     if (sound === "start") playStartSound();
     else playMenuSound();
@@ -54,6 +70,7 @@ export default function Game() {
     }, 250);
   };
 
+  // Generic helper to safely play audio effects
   const playAudio = (audioEl, volume = 0.7) => {
     if (!audioEl) return;
     audioEl.currentTime = 0;
@@ -77,6 +94,8 @@ export default function Game() {
     playAudio(errorAudioRef.current, 0.8);
   };
 
+  // The audio toggle logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, adapted, and integrated it into this project.
   const toggleMute = async () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -103,6 +122,7 @@ export default function Game() {
     }
   };
 
+  // Calculate the final score based on outcome, accuracy, streak, and meter position
   const calculateFinalScore = () => {
     return (
       (status === "win" ? 100 : 25) +
@@ -112,10 +132,12 @@ export default function Game() {
     );
   };
 
+  // Redirect unauthenticated users back to login
   const handleUnauthorized = () => {
     navigate("/login", { replace: true });
   };
 
+  // Log the user out and clear the current game session on the frontend
   const handleLogout = async () => {
     try {
       setLoggingOut(true);
@@ -136,6 +158,8 @@ export default function Game() {
     }
   };
 
+  // The question-loading logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, modified, and integrated it into this project.
   const loadQuestions = async () => {
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
@@ -144,6 +168,7 @@ export default function Game() {
       setPageLoading(true);
       setLoadError("");
 
+      // Check that the user is still authenticated before loading questions
       const authRes = await axios.get("http://localhost:3001/me", {
         withCredentials: true,
       });
@@ -153,6 +178,7 @@ export default function Game() {
         return;
       }
 
+      // Fetch a fresh set of questions from the backend
       const res = await axios.get(
         "http://localhost:3001/game/questions?amount=5",
         {
@@ -189,16 +215,20 @@ export default function Game() {
     }
   };
 
+  // Load the first set of questions when the page opens
   useEffect(() => {
     loadQuestions();
   }, []);
 
+  // Update win/lose status based on the current balance meter
   useEffect(() => {
     if (meter >= 4) setStatus("win");
     else if (meter <= -4) setStatus("lose");
     else setStatus("playing");
   }, [meter]);
 
+  // The animation state handling below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, adapted, and integrated it into this project.
   useEffect(() => {
     const prevMeter = prevMeterRef.current;
     const currMeter = meter;
@@ -259,6 +289,7 @@ export default function Game() {
     else setP2Anim("HANG_IDLE");
   }, [meter, streak, status]);
 
+  // Save the completed game result once the match ends
   useEffect(() => {
     const saveResult = async () => {
       if ((status !== "win" && status !== "lose") || resultSaved) return;
@@ -290,6 +321,7 @@ export default function Game() {
     saveResult();
   }, [status, resultSaved, correctAnswers, wrongAnswers, bestStreak, meter]);
 
+  // Move to the next question or reload a new batch when the set ends
   const nextQuestion = async () => {
     if (status !== "playing") return;
 
@@ -301,6 +333,8 @@ export default function Game() {
     setIdx((prev) => prev + 1);
   };
 
+  // The answer submission logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, modified, and integrated it into this project.
   const submitAnswer = (choice) => {
     if (status !== "playing" || locked) return;
 
@@ -346,6 +380,7 @@ export default function Game() {
     }
   };
 
+  // Reset the full game state for a fresh playthrough
   const resetGame = async () => {
     playStartSound();
 
@@ -370,6 +405,7 @@ export default function Game() {
     await loadQuestions();
   };
 
+  // Handle post-animation transitions for Player 1
   const handleP1AnimDone = (finishedAnim) => {
     if (status === "win") return;
 
@@ -402,6 +438,7 @@ export default function Game() {
     }
   };
 
+  // Handle post-animation transitions for Player 2
   const handleP2AnimDone = (finishedAnim) => {
     if (status === "win") {
       setP2Anim("UNDERWATER_DRIFT");
@@ -425,6 +462,7 @@ export default function Game() {
     }
   };
 
+  // Control animation playback speed for Player 1
   const getP1Speed = () => {
     if (p1Anim === "CLIMB_UP") return 0.28;
     if (p1Anim === "BACKFLIP_WIN") return 0.5;
@@ -432,6 +470,7 @@ export default function Game() {
     return 0.65;
   };
 
+  // Control animation playback speed for Player 2
   const getP2Speed = () => {
     if (p2Anim === "CLIMB_UP") return 0.28;
     if (p2Anim === "BACKFLIP_WIN") return 0.5;
@@ -439,6 +478,7 @@ export default function Game() {
     return 0.65;
   };
 
+  // Loading screen while questions are being prepared
   if (pageLoading) {
     return (
       <div className="scene hail-game-page">
@@ -484,6 +524,7 @@ export default function Game() {
     );
   }
 
+  // Error state if questions fail to load
   if (!questions.length) {
     return (
       <div className="scene hail-game-page">
@@ -628,6 +669,7 @@ export default function Game() {
                     <div className="hail-stage-glow" />
                     <div className="hail-water-glow" />
 
+                    {/* Move and rotate the plank visually based on the current game balance */}
                     <img
                       src={plankImg}
                       alt="plank"

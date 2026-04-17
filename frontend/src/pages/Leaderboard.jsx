@@ -1,3 +1,9 @@
+/*
+Parts of this file were developed with assistance from ChatGPT (OpenAI), April 2026.
+The suggestions were reviewed, understood, modified, tested, and integrated into this project by me.
+This includes support with leaderboard data loading, filtering, summary display, and table rendering logic.
+*/
+
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -49,6 +55,8 @@ export default function Leaderboard() {
     }
   };
 
+  // The leaderboard loading logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, adapted, and integrated it into this project.
   useEffect(() => {
     // Load all leaderboard sections together
     const loadLeaderboard = async () => {
@@ -296,6 +304,7 @@ export default function Leaderboard() {
                     </thead>
                     <tbody>
                       {visiblePlayers.map((player) => {
+                        // Keep rank consistent with the filtered player list
                         const actualRank =
                           filteredPlayers.findIndex((p) => p._id === player._id) + 1;
 

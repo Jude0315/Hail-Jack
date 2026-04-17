@@ -1,22 +1,32 @@
+/*
+Parts of this file were developed with assistance from ChatGPT (OpenAI), April 2026.
+The suggestions were reviewed, understood, modified, tested, and integrated into this project by me.
+This includes support with signup flow, session checking, password validation, audio controls, and UI interaction logic.
+*/
+
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/Signup.css";
 
 function Signup() {
+  // Form input state
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  // UI feedback state
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
 
+  // Audio state
   const [muted, setMuted] = useState(true);
   const [audioStarted, setAudioStarted] = useState(false);
 
+  // Audio references
   const audioRef = useRef(null);
   const clickAudioRef = useRef(null);
   const signupAudioRef = useRef(null);
@@ -27,6 +37,9 @@ function Signup() {
 
   const navigate = useNavigate();
 
+  // Check if the user already has an active session and redirect if logged in
+  // The session-checking logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, adapted, and integrated it into this project.
   useEffect(() => {
     let mounted = true;
 
@@ -54,6 +67,7 @@ function Signup() {
     };
   }, [navigate]);
 
+  // Generic helper to safely play UI audio
   const playAudio = async (audioEl, volume = 0.7) => {
     if (!audioEl) return;
 
@@ -83,6 +97,7 @@ function Signup() {
     await playAudio(errorAudioRef.current, 0.8);
   };
 
+  // Play a soft typing sound while the user types in the form
   const playTypingSound = () => {
     const audio = typingAudioRef.current;
     if (!audio || muted) return;
@@ -100,6 +115,8 @@ function Signup() {
     }
   };
 
+  // The audio toggle logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, adapted, and integrated it into this project.
   const toggleMute = async () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -126,6 +143,7 @@ function Signup() {
     }
   };
 
+  // Navigate back to the login page after playing a sound
   const goToLogin = async () => {
     await playBackSound();
     setTimeout(() => {
@@ -133,17 +151,21 @@ function Signup() {
     }, 450);
   };
 
+  // Validate password strength before allowing registration
   const validatePassword = (pwd) => {
     const regex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()[\]{}\-_=+\\|;:'",.<>/?`~]).{8,}$/;
     return regex.test(pwd);
   };
 
+  // The signup submission and validation logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, modified, and integrated it into this project.
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
+    // Basic frontend validation before sending the request
     if (!name.trim()) {
       setError("Name is required");
       await playErrorSound();
@@ -220,11 +242,13 @@ function Signup() {
     }
   };
 
+  // Helper values for live password feedback in the form
   const passwordsMatch =
     confirmPassword.length > 0 && password === confirmPassword;
 
   const passwordStrong = validatePassword(password);
 
+  // Loading view while the application checks for an existing session
   if (checkingSession) {
     return (
       <div className="hail-signup-page">

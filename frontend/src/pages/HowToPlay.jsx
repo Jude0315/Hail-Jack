@@ -1,3 +1,9 @@
+/*
+Parts of this file were developed with assistance from ChatGPT (OpenAI), April 2026.
+The suggestions were reviewed, understood, modified, tested, and integrated into this project by me.
+This includes support with page interaction effects, audio controls, navigation flow, and instructional UI structure.
+*/
+
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/howtoplay.css";
@@ -6,20 +12,25 @@ export default function HowToPlay() {
   const navigate = useNavigate();
   const sceneRef = useRef(null);
 
+  // Audio state
   const [muted, setMuted] = useState(true);
   const [audioStarted, setAudioStarted] = useState(false);
 
+  // Audio references
   const audioRef = useRef(null);
   const clickAudioRef = useRef(null);
   const backAudioRef = useRef(null);
   const startAudioRef = useRef(null);
 
+  // The mouse-based interaction effect below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, adapted, and integrated it into this project.
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene) return;
 
     let rafId = null;
 
+    // Update CSS variables so the page reacts to mouse movement
     const updateVars = (clientX, clientY) => {
       const rect = scene.getBoundingClientRect();
       const x = (clientX - rect.left) / rect.width;
@@ -60,6 +71,7 @@ export default function HowToPlay() {
     };
   }, []);
 
+  // Generic helper to safely play UI audio
   const playAudio = (audioEl, volume = 0.7) => {
     if (!audioEl) return;
 
@@ -87,6 +99,7 @@ export default function HowToPlay() {
     playAudio(startAudioRef.current, 0.75);
   };
 
+  // Prime short UI sounds after the main audio starts so later playback is smoother
   const primeAudio = async (audioEl) => {
     if (!audioEl) return;
     try {
@@ -96,14 +109,15 @@ export default function HowToPlay() {
     } catch {}
   };
 
-  // ✅ FIXED MUTE BUTTON
+  // The mute toggle and audio priming logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, modified, and integrated it into this project.
   const toggleMute = async () => {
     const audio = audioRef.current;
     if (!audio) return;
 
     try {
       if (muted) {
-        // 🔊 TURN ON
+        // Turn background sound on
         audio.muted = false;
         audio.volume = 0.3;
 
@@ -120,7 +134,7 @@ export default function HowToPlay() {
         playMuteClickSound();
         setMuted(false);
       } else {
-        // 🔇 TURN OFF
+        // Play click first, then mute the background sound
         playMuteClickSound();
 
         setTimeout(() => {
@@ -133,6 +147,7 @@ export default function HowToPlay() {
     }
   };
 
+  // Navigate back to the dashboard page
   const goBack = () => {
     playBackSound();
     setTimeout(() => {
@@ -140,6 +155,7 @@ export default function HowToPlay() {
     }, 400);
   };
 
+  // Navigate directly to the main game page
   const goToGame = () => {
     playStartSound();
     setTimeout(() => {
@@ -147,6 +163,7 @@ export default function HowToPlay() {
     }, 400);
   };
 
+  // Decorative snow elements for the scene
   const snowflakes = Array.from({ length: 18 }, (_, i) => i + 1);
 
   return (
@@ -223,6 +240,7 @@ export default function HowToPlay() {
                   <span>Quiz Duel</span>
                 </div>
 
+                {/* Small visual demo of the balance meter used in the game */}
                 <div className="hail-how-meter-demo">
                   <div className="hail-how-side left">Rose</div>
                   <div className="hail-how-bar">

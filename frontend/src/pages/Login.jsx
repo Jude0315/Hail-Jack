@@ -1,19 +1,29 @@
+/*
+Parts of this file were developed with assistance from ChatGPT (OpenAI), April 2026.
+The suggestions were reviewed, understood, modified, tested, and integrated into this project by me.
+This includes support with login flow, session checking, audio controls, and UI interaction logic.
+*/
+
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/login.css";
 
 function Login() {
+  // Form input state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // UI feedback state
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
 
+  // Audio state
   const [muted, setMuted] = useState(true);
   const [audioStarted, setAudioStarted] = useState(false);
 
+  // Audio references
   const audioRef = useRef(null);
   const clickAudioRef = useRef(null);
   const startAudioRef = useRef(null);
@@ -24,6 +34,9 @@ function Login() {
 
   const navigate = useNavigate();
 
+  // Check if the user already has an active session and redirect if logged in
+  // The session-checking logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, adapted, and integrated it into this project.
   useEffect(() => {
     let mounted = true;
 
@@ -51,6 +64,7 @@ function Login() {
     };
   }, [navigate]);
 
+  // Generic helper to safely play UI audio
   const playAudio = (audioEl, volume = 0.7) => {
     if (!audioEl) return;
     audioEl.currentTime = 0;
@@ -74,6 +88,7 @@ function Login() {
     playAudio(errorAudioRef.current, 0.8);
   };
 
+  // Play a soft typing sound while the user types in the form
   const playTypingSound = () => {
     const audio = typingAudioRef.current;
     if (!audio || muted) return;
@@ -91,6 +106,8 @@ function Login() {
     }
   };
 
+  // The audio toggle logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, adapted, and integrated it into this project.
   const toggleMute = async () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -117,6 +134,7 @@ function Login() {
     }
   };
 
+  // Navigate to the register page after playing a UI sound
   const goToRegister = () => {
     playRegisterSound();
     setTimeout(() => {
@@ -124,10 +142,13 @@ function Login() {
     }, 250);
   };
 
+  // The login submission logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, modified, and integrated it into this project.
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
+    // Basic frontend validation before sending the request
     if (!email.trim() || !password.trim()) {
       setError("Please enter both email and password.");
       playErrorSound();
@@ -164,6 +185,7 @@ function Login() {
     }
   };
 
+  // Loading view while the application checks for an existing session
   if (checkingSession) {
     return (
       <div className="hail-login-page">

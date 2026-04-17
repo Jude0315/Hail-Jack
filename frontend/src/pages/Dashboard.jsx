@@ -1,3 +1,9 @@
+/*
+Parts of this file were developed with assistance from ChatGPT (OpenAI), April 2026.
+The suggestions were reviewed, understood, modified, tested, and integrated into this project by me.
+This includes support with dashboard user loading, audio controls, navigation flow, and interactive visual effects.
+*/
+
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -7,19 +13,25 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const sceneRef = useRef(null);
 
+  // Store the logged-in player's name for the welcome message
   const [playerName, setPlayerName] = useState("Crew Member");
   const [pageLoading, setPageLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
 
+  // Audio state
   const [muted, setMuted] = useState(true);
   const [audioStarted, setAudioStarted] = useState(false);
 
+  // Audio references
   const audioRef = useRef(null);
   const clickAudioRef = useRef(null);
   const startAudioRef = useRef(null);
   const menuAudioRef = useRef(null);
   const logoutAudioRef = useRef(null);
 
+  // Load the current logged-in user before showing the dashboard
+  // The user-loading logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, adapted, and integrated it into this project.
   useEffect(() => {
     let mounted = true;
 
@@ -61,12 +73,15 @@ export default function Dashboard() {
     };
   }, [navigate]);
 
+  // The mouse-based dashboard interaction below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, modified, and integrated it into this project.
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene || pageLoading) return;
 
     let rafId = null;
 
+    // Update CSS variables so the dashboard reacts to mouse movement
     const updateVars = (clientX, clientY) => {
       const rect = scene.getBoundingClientRect();
       const x = (clientX - rect.left) / rect.width;
@@ -107,6 +122,7 @@ export default function Dashboard() {
     };
   }, [pageLoading]);
 
+  // Generic helper to safely play UI audio
   const playAudio = (audioEl, volume = 0.7) => {
     if (!audioEl) return;
     audioEl.currentTime = 0;
@@ -130,6 +146,8 @@ export default function Dashboard() {
     playAudio(logoutAudioRef.current, 0.75);
   };
 
+  // The audio toggle logic below was developed with assistance from ChatGPT (OpenAI), April 2026.
+  // I reviewed, understood, adapted, and integrated it into this project.
   const toggleMute = async () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -156,6 +174,7 @@ export default function Dashboard() {
     }
   };
 
+  // Navigate to the main game page
   const goToGame = () => {
     playStartSound();
     setTimeout(() => {
@@ -163,6 +182,7 @@ export default function Dashboard() {
     }, 250);
   };
 
+  // Navigate to the leaderboard page
   const goToLeaderboard = () => {
     playMenuSound();
     setTimeout(() => {
@@ -170,6 +190,7 @@ export default function Dashboard() {
     }, 250);
   };
 
+  // Navigate to the how-to-play page
   const goToHowToPlay = () => {
     playMenuSound();
     setTimeout(() => {
@@ -177,6 +198,7 @@ export default function Dashboard() {
     }, 250);
   };
 
+  // Log the user out and return them to the login screen
   const handleLogout = async () => {
     try {
       setLoggingOut(true);
@@ -197,10 +219,12 @@ export default function Dashboard() {
     }
   };
 
+  // Create repeated decorative elements for the animated scene
   const snowflakes = Array.from({ length: 34 }, (_, i) => i + 1);
   const stars = Array.from({ length: 18 }, (_, i) => i + 1);
   const shards = Array.from({ length: 12 }, (_, i) => i + 1);
 
+  // Loading screen while the user session is being checked
   if (pageLoading) {
     return (
       <div
